@@ -15,10 +15,11 @@ datasource db {
 
 model User {
   id          Int      @id @default(autoincrement())
-  email       String?  @unique
+  email       String  @unique
   name        String? 
-  number      String  @unique
-  password    String
+  password    String?
+  auth_type   String?  @default("user")
+  image       String?  @default("https://cdn.icon-icons.com/icons2/2643/PNG/512/male_boy_person_people_avatar_icon_159358.png")
 }
 
 model Merchant {
