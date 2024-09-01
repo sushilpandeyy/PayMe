@@ -1,22 +1,57 @@
 "use client";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {HomeIcon} from "@radix-ui/react-icons"
+import {Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {Button} from "@/components/ui/button"
+import {House, IndianRupee, ArrowLeftRight} from "lucide-react"
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 export default function Navbar(){
-    return <>
-    <nav className="grid-cols-1	">
-    <div>
-    <Alert>
-      <HomeIcon className="h-4 w-4" />
-      <AlertTitle>Home</AlertTitle>
-    </Alert>
-    </div>
-        <button type="button" className="p-2">
-        Money Transfer
-        </button>
-        <button type="button" className="p-2">
-        Transactions
-        </button>
+    return <nav className="grid gap-1 p-2">
+      <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-lg bg-muted"
+                aria-label="Home"
+              >
+                <House className="size-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={5}>
+              Home
+            </TooltipContent>
+       </Tooltip>
+       <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-lg"
+                aria-label="Models"
+              >
+                <IndianRupee className="size-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={5}>
+              Transfer Money
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-lg"
+                aria-label="Models"
+              >
+                <ArrowLeftRight className="size-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={5}>
+              Transactions
+            </TooltipContent>
+          </Tooltip>
+       </TooltipProvider>
     </nav>
-    </>
 }
