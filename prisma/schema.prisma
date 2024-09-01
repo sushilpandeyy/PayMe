@@ -22,12 +22,6 @@ model User {
   image       String?  @default("https://cdn.icon-icons.com/icons2/2643/PNG/512/male_boy_person_people_avatar_icon_159358.png")
 }
 
-model Merchant {
-  id          Int     @id @default(autoincrement())
-  email       String  @unique
-  name        String?
-  auth_type   AuthType   
-}
 
 enum AuthType {
   Google

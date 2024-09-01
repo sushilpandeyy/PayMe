@@ -5,7 +5,7 @@ import {House, IndianRupee, ArrowLeftRight} from "lucide-react"
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 export default function Navbar(){
-    return <nav className="grid gap-1 p-2">
+    return <nav className="grid gap-1 p-2 w-min">
       <TooltipProvider>
         <Tooltip>
             <TooltipTrigger asChild>
