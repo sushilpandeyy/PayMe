@@ -1,10 +1,10 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { Provider } from "../provider";
 
 const Logg = () => {
     const { data: session } = useSession();
-
     return (
         <>
             <div>
@@ -20,6 +20,7 @@ const Logg = () => {
 
 export default function Appbar() {
     return (
+        <Provider>
         <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
             <h1 className="text-4xl">
                 PayMe
@@ -28,5 +29,6 @@ export default function Appbar() {
                 <Logg />
             </div>
         </div>
+        </Provider>
     );
 }
