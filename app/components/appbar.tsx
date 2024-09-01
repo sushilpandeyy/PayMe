@@ -2,16 +2,26 @@
 
 import { useSession } from "next-auth/react";
 import { Provider } from "../provider";
+import { Avatar,AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import Loginbtn from "./ui/Loginbtn";
+import { Logindrop } from "./ui/Loginbtn";
+
 
 const Logg = () => {
     const { data: session } = useSession();
+    const img = session?.user?.image || "https://github.com/shadcn.png";
     return (
         <>
             <div>
                 {session ? (
-                    <p>Welcome, {session.user?.name}</p>
+                  <Logindrop>
+                  <Avatar>
+                    <AvatarImage src={img} alt={session?.user?.name || "Payme user"} className="rounded-full w-14 h-14" />
+                    <AvatarFallback>{session?.user?.name}</AvatarFallback>
+                  </Avatar>
+                </Logindrop>
                 ) : (
-                    <p>Please log in</p>
+                    <Loginbtn/>
                 )}
             </div>
         </>
