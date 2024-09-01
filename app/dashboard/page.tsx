@@ -1,8 +1,7 @@
 "use client"
 import { redirect } from 'next/navigation'
 import Image from "next/image";
-import { useSession } from "next-auth/react"
-import { signOut } from 'next-auth/react';
+import { useSession, signOut } from "next-auth/react"
 
 export default function Dashboard() {
 const a= useSession();
