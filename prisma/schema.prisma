@@ -14,14 +14,28 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  email       String  @unique
+  id          Int            @id @default(autoincrement())
+  email       String         @unique
   name        String? 
   password    String?
-  auth_type   String?  @default("user")
-  image       String?  @default("https://cdn.icon-icons.com/icons2/2643/PNG/512/male_boy_person_people_avatar_icon_159358.png")
+  auth_type   String?        @default("user")
+  image       String?        @default("https://cdn.icon-icons.com/icons2/2643/PNG/512/male_boy_person_people_avatar_icon_159358.png")
+  userID      String?
+
+  sentTransactions     Transactions[] @relation("SentTransactions")
+  receivedTransactions Transactions[] @relation("ReceivedTransactions")
 }
 
+model Transactions {
+  Transaction_id String  @id @default(uuid())
+  Amount         Int     
+  Type           String
+  Sender_Id      Int     
+  Receiver_Id    Int     
+
+  sender   User @relation("SentTransactions", fields: [Sender_Id], references: [id])
+  receiver User @relation("ReceivedTransactions", fields: [Receiver_Id], references: [id])
+}
 
 enum AuthType {
   Google
