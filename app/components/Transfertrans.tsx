@@ -30,12 +30,12 @@ export default function Transfertrans(){
           <CardHeader>
             <CardTitle>Send Money</CardTitle>
             <CardDescription>
-              Send money to any userid.
+              Send money to any userid
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="space-y-1">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">User_ID</Label>
               <Input id="name" defaultValue="Pedro Duarte" />
             </div>
             <div className="space-y-1">
@@ -44,7 +44,7 @@ export default function Transfertrans(){
             </div>
           </CardContent>
           <CardFooter>
-            <Button>Save changes</Button>
+            <Button>Send</Button>
           </CardFooter>
         </Card>
       </TabsContent>
