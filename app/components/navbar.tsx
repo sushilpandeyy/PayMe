@@ -5,9 +5,10 @@ import {House, IndianRupee, ArrowLeftRight} from "lucide-react"
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 export default function Navbar(){
-    return <nav className="grid gap-1 p-2 w-min">
+    return <nav className="gap-1 p-4 py-6 w-min">
       <TooltipProvider>
-        <Tooltip>
+        <div className="py-4">
+        <Tooltip >
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
@@ -22,6 +23,8 @@ export default function Navbar(){
               Home
             </TooltipContent>
        </Tooltip>
+       </div>
+       <div className="py-4">
        <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -37,6 +40,8 @@ export default function Navbar(){
               Transfer Money
             </TooltipContent>
           </Tooltip>
+          </div>
+          <div className="py-4">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -52,6 +57,7 @@ export default function Navbar(){
               Transactions
             </TooltipContent>
           </Tooltip>
+          </div>
        </TooltipProvider>
     </nav>
 }
