@@ -10,6 +10,7 @@ import { Card,
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Copy, Share } from "lucide-react";
 
 export default function Transfertrans(){
 
@@ -35,12 +36,12 @@ export default function Transfertrans(){
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="space-y-1">
-              <Label htmlFor="name">User_ID</Label>
-              <Input id="name" defaultValue="Pedro Duarte" />
+              <Label htmlFor="User ID">User ID</Label>
+              <Input id="User_ID" placeholder="Enter Reciver's UserID" />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" defaultValue="@peduarte" />
+              <Label htmlFor="username">Amount</Label>
+              <Input id="amount" type="number" placeholder="Enter Amount"/>
             </div>
           </CardContent>
           <CardFooter>
@@ -51,23 +52,27 @@ export default function Transfertrans(){
       <TabsContent value="Receive">
         <Card>
           <CardHeader>
-            <CardTitle>Password</CardTitle>
+            <CardTitle>Recieve Amount</CardTitle>
             <CardDescription>
-              Change your password here. After saving, you'll be logged out.
+              Recieve Money Via QR or User_ID
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="space-y-1">
-              <Label htmlFor="current">Current password</Label>
-              <Input id="current" type="password" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="new">New password</Label>
-              <Input id="new" type="password" />
-            </div>
+          <div className="flex items-end justify-between">
+           <span className="text-lg">
+           Order Oe31b70H
+           </span>
+           <span className="text-lg">
+           <Share/>
+           </span>
+           </div>
+           <div className="h-20"></div>
+           <span className="text-lg">
+           Qr Code
+           </span>
           </CardContent>
           <CardFooter>
-            <Button>Save password</Button>
+            
           </CardFooter>
         </Card>
       </TabsContent>
