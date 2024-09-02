@@ -12,18 +12,18 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+ model User {
+  id                    Int            @id @default(autoincrement())
+  email                 String         @unique
+  name                  String? 
+  password              String?
+  auth_type             String?        @default("user")
+  image                 String?        @default("https://cdn.icon-icons.com/icons2/2643/PNG/512/male_boy_person_people_avatar_icon_159358.png")
+  userID                String?
 
-model User {
-  id          Int            @id @default(autoincrement())
-  email       String         @unique
-  name        String? 
-  password    String?
-  auth_type   String?        @default("user")
-  image       String?        @default("https://cdn.icon-icons.com/icons2/2643/PNG/512/male_boy_person_people_avatar_icon_159358.png")
-  userID      String?
-
-  sentTransactions     Transactions[] @relation("SentTransactions")
-  receivedTransactions Transactions[] @relation("ReceivedTransactions")
+  sentTransactions      Transactions[] @relation("SentTransactions")
+  receivedTransactions  Transactions[] @relation("ReceivedTransactions")
+  accounts              Account[]      @relation("UserAccounts")
 }
 
 model Transactions {
@@ -33,8 +33,17 @@ model Transactions {
   Sender_Id      Int     
   Receiver_Id    Int     
 
-  sender   User @relation("SentTransactions", fields: [Sender_Id], references: [id])
-  receiver User @relation("ReceivedTransactions", fields: [Receiver_Id], references: [id])
+  sender         User @relation("SentTransactions", fields: [Sender_Id], references: [id])
+  receiver       User @relation("ReceivedTransactions", fields: [Receiver_Id], references: [id])
+}
+
+model Account {
+  Account_id  String  @id @default(uuid())
+  Balance     Int     
+  PIN         Int     
+  user_id     Int     
+
+  user        User @relation("UserAccounts", fields: [user_id], references: [id])
 }
 
 enum AuthType {

@@ -16,6 +16,7 @@ if(a.status=="unauthenticated"){
     <Navbar
      selected="Transfer"
     />
+    ss
     </div>
     </main>
   );
