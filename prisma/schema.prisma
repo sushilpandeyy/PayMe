@@ -32,7 +32,7 @@ model Transactions {
   Type           String
   Sender_Id      Int     
   Receiver_Id    Int     
-
+  Category       String
   sender         User @relation("SentTransactions", fields: [Sender_Id], references: [id])
   receiver       User @relation("ReceivedTransactions", fields: [Receiver_Id], references: [id])
 }
@@ -42,7 +42,6 @@ model Account {
   Balance     Int     
   PIN         Int     
   user_id     Int     
-
   user        User @relation("UserAccounts", fields: [user_id], references: [id])
 }
 
