@@ -82,7 +82,7 @@ export const authOptions = {
             data: {
               email: user.email,
               name: user.name || "User",
-              auth_type: "user",
+              auth_type: "Google",
               image: user.image || "",
               password: "Google"
             },

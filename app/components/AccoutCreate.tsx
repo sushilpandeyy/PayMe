@@ -1,10 +1,15 @@
-"use client"
-import { Card, CardContent, CardDescription, CardTitle, CardHeader } from "@/components/ui/card";
-import "../globals.css"
+"use client";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import axios from 'axios';
+import { useSession } from "next-auth/react";
+import "../globals.css";
+import { Button } from "@/components/ui/button";
+import { CreditCardIcon } from "lucide-react";
 
 const CreditCard: React.FC = () => {
-    return (
-        <div className="relative w-80 h-48 p-4 bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-xl shadow-2xl text-white overflow-hidden">
+  return (
+    <div className="relative w-80 h-48 p-4 bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-xl shadow-2xl text-white overflow-hidden">
       <div className="absolute inset-0">
         <div className="shiny"></div>
       </div>
@@ -28,17 +33,46 @@ const CreditCard: React.FC = () => {
         </div>
       </div>
     </div>
-    );
-  };
-  
+  );
+};
 
-export default function AccountCreate(){
-    const account = 
-    return <Card className="p-4 h-max">
-    <CardContent>
+export default function AccountCreate() {
+  const [accountStatus, setAccountStatus] = useState<string>("loading");
+  const sessioninfo=useSession();
+
+  useEffect(() => {
+    async function fetchAccount() {
+      try {
+        const response = await axios.get(`/api/user/account?email=${sessioninfo.data?.user?.email}`);
+        if (response.data) {
+          setAccountStatus("exists");
+        } else {
+          setAccountStatus("no");
+        }
+      } catch (error) {
+        console.log(error);
+        setAccountStatus("no");
+      }
+    }
+
+    fetchAccount();
+  }, []);
+  return (
+    <Card className="p-4 h-max">
+      <CardContent>
         <div className="flex content-center justify-center">
-        <CreditCard/>
+          {accountStatus === "loading" ? (
+            <div>Loading...</div>
+          ) : accountStatus === "no" ? (
+            <Button>
+                <CreditCardIcon
+                />Open Account
+            </Button>
+          ) : (
+            <CreditCard />
+          )}
         </div>
-    </CardContent>
-  </Card>
+      </CardContent>
+    </Card>
+  );
 }

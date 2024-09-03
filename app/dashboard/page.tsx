@@ -9,9 +9,9 @@ import HomeTransaction from '../components/Hometransaction';
 import AccountCreate from '../components/AccoutCreate';
 
 export default function Dashboard() {
-const a= useSession();
+const sessioninf= useSession();
 
-if(a.status=="unauthenticated"){
+if(sessioninf.status=="unauthenticated"){
   redirect('/api/auth/signin')
 }
   return (
