@@ -4,8 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import axios from 'axios';
 import { useSession } from "next-auth/react";
 import "../globals.css";
-import { Button } from "@/components/ui/button";
-import { CreditCardIcon } from "lucide-react";
+import OpenAccount from "./Openaccount"
 
 const CreditCard: React.FC = () => {
   return (
@@ -36,6 +35,8 @@ const CreditCard: React.FC = () => {
   );
 };
 
+
+
 export default function AccountCreate() {
   const [accountStatus, setAccountStatus] = useState<string>("loading");
   const sessioninfo=useSession();
@@ -64,10 +65,7 @@ export default function AccountCreate() {
           {accountStatus === "loading" ? (
             <div>Loading...</div>
           ) : accountStatus === "no" ? (
-            <Button>
-                <CreditCardIcon
-                />Open Account
-            </Button>
+            <OpenAccount/>
           ) : (
             <CreditCard />
           )}
