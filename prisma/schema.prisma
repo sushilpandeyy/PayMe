@@ -37,7 +37,7 @@ model Transactions {
 model Account {
   Account_number  String @id 
   Balance         Int     
-  PIN             Int
+  PIN             String
   userID          String     
   user            User @relation("UserAccounts", fields: [userID], references: [userID])
   createdAt       DateTime @default(now())
