@@ -3,6 +3,26 @@ import { redirect } from 'next/navigation'
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react"
 import Navbar from '../components/navbar';
+import { InCard, OutCard, TotalBalCard, TransactionsCard } from '../components/TransCards';
+import { Button } from '@/components/ui/button';
+
+function Headcards(){
+  return <div className="grid grid-cols-4 gap-4 w-full">
+  <TotalBalCard />
+  <TransactionsCard />
+  <InCard />
+  <OutCard />
+</div>
+}
+
+function Buttons2export(){
+  return <div className="grid grid-cols-4 gap-2 w-full">
+  <h2 className="col-span-3 text-xl pt-4">Transactions</h2>
+  <div className="pt-4 justify-self-end">
+    <Button variant="outline" size="lg">Export</Button>
+  </div>
+</div>
+}
 
 export default function Transaction() {
 const a= useSession();
@@ -16,6 +36,15 @@ if(a.status=="unauthenticated"){
     <Navbar
      selected="Transaction"
     />
+    <div className="headcards w-full">
+    <Headcards/>
+    <div className="btns">
+    <Buttons2export/>
+    </div>
+    <div className="Transactionslist">
+      s
+    </div>
+    </div>
     </div>
     </main>
   );

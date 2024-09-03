@@ -87,7 +87,7 @@ return   <Tabs defaultValue="week">
     <CardHeader className="px-7">
       <CardTitle>Transactions</CardTitle>
       <CardDescription>
-        Recent transactions
+        Recent week transactions
       </CardDescription>
     </CardHeader>
     <CardContent>
