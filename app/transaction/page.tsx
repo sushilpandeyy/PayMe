@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react"
 import Navbar from '../components/navbar';
 import { InCard, OutCard, TotalBalCard, TransactionsCard } from '../components/TransCards';
 import { Button } from '@/components/ui/button';
+import TransactionTable from '../components/TransactionTable';
 
 function Headcards(){
   return <div className="grid grid-cols-4 gap-4 w-full">
@@ -42,7 +43,7 @@ if(a.status=="unauthenticated"){
     <Buttons2export/>
     </div>
     <div className="Transactionslist">
-      s
+      <TransactionTable/>
     </div>
     </div>
     </div>
