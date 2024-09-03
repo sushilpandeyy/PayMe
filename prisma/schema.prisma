@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,12 +11,14 @@ model User {
   email                 String         @unique
   name                  String? 
   password              String?
-  auth_type             String?        @default("user")
+  auth_type             AuthType       @default(Google)
   image                 String?        @default("https://cdn.icon-icons.com/icons2/2643/PNG/512/male_boy_person_people_avatar_icon_159358.png")
   userID                String?        @unique
   sentTransactions      Transactions[] @relation("SentTransactions")
   receivedTransactions  Transactions[] @relation("ReceivedTransactions")
   accounts              Account[]      @relation("UserAccounts")
+  createdAt             DateTime       @default(now()) @db.Timestamptz
+  updatedAt             DateTime       @updatedAt @db.Timestamptz
 }
 
 model Transactions {
@@ -34,15 +30,18 @@ model Transactions {
   Category       String
   sender         User @relation("SentTransactions", fields: [Sender_Id], references: [userID])
   receiver       User @relation("ReceivedTransactions", fields: [Receiver_Id], references: [userID])
+  createdAt      DateTime @default(now()) @db.Timestamptz
+  updatedAt      DateTime @updatedAt @db.Timestamptz
 }
 
-
 model Account {
-  Account_number  Int  @id 
-  Balance     Int     
-  PIN         Int     
-  user_id     Int     
-  user        User @relation("UserAccounts", fields: [user_id], references: [id])
+  Account_number  String @id 
+  Balance         Int     
+  PIN             Int
+  userID          String     
+  user            User @relation("UserAccounts", fields: [userID], references: [userID])
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
 }
 
 enum AuthType {

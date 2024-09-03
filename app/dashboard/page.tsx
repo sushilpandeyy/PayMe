@@ -27,7 +27,7 @@ if(a.status=="unauthenticated"){
   </div>
   <div className="flex flex-col">
     <AccountCreate/>
-    <div className="pt-10">
+    <div className="pt-6">
     <Piecharthead />
     </div>
   </div>

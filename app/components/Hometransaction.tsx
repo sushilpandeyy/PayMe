@@ -33,13 +33,7 @@ import {
 export default function HomeTransaction(){
   function Tabshead(){
     return <div className="flex items-center">
-    <TabsList>
-      <TabsTrigger value="week">Week</TabsTrigger>
-      <TabsTrigger value="month">Month</TabsTrigger>
-      <TabsTrigger value="year">Year</TabsTrigger>
-    </TabsList>
-    <div className="ml-auto flex items-center gap-2">
-      <DropdownMenu>
+     <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
@@ -64,6 +58,7 @@ export default function HomeTransaction(){
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
+    <div className="ml-auto flex items-center gap-2">
       <Button
         size="sm"
         variant="outline"
@@ -78,12 +73,8 @@ export default function HomeTransaction(){
 
 
 
-return   <Tabs defaultValue="week">
-    <div className="p-4">
-    <Tabshead/>
-    </div>
-<TabsContent value="week">
-  <Card x-chunk="dashboard-05-chunk-3">
+return  <div className="pt-6">
+<Card x-chunk="dashboard-05-chunk-3">
     <CardHeader className="px-7">
       <CardTitle>Transactions</CardTitle>
       <CardDescription>
@@ -124,6 +115,5 @@ return   <Tabs defaultValue="week">
       </Table>
     </CardContent>
   </Card>
-</TabsContent>
-</Tabs>
+  </div>
 }

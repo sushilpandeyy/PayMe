@@ -18,7 +18,18 @@ export async function GET(request: NextRequest) {
         });
 
         if (user?.userID) {
-            return NextResponse.json({ message: "Found User", user }, { status: 200 });
+            const account = await prisma.account.findFirst({
+                where: {
+                    userID: user?.userID
+                },
+            });
+            if(account){
+                NextResponse.json({
+                    Account_number: account.Account_number,
+                    Account_Holder: user?.name,
+                    UserID: account.userID
+                })
+            }
         } else {
             return NextResponse.json({ message: 'Account Not Created' }, { status: 401 });
         }
