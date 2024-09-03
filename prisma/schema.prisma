@@ -38,7 +38,7 @@ model Transactions {
 
 
 model Account {
-  Account_id  String  @id @default(uuid())
+  Account_number  Int  @id 
   Balance     Int     
   PIN         Int     
   user_id     Int     

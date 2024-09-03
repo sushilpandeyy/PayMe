@@ -6,6 +6,7 @@ import Setcardh from '../components/Setcardh';
 import Navbar from '../components/navbar';
 import { Piecharthead } from '../components/ui/Piechart';
 import HomeTransaction from '../components/Hometransaction';
+import AccountCreate from '../components/AccoutCreate';
 
 export default function Dashboard() {
 const a= useSession();
@@ -25,7 +26,10 @@ if(a.status=="unauthenticated"){
     <HomeTransaction/>
   </div>
   <div className="flex flex-col">
+    <AccountCreate/>
+    <div className="pt-10">
     <Piecharthead />
+    </div>
   </div>
 </div>
     </div>
