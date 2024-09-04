@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
                     Account_number: account.Account_number,
                     Account_Holder: user?.name,
                     UserID: account.userID
-                }, { status: 200 })
+                }, { status: 200 });
             }
         } else {
             return NextResponse.json({ message: 'Account Not Created' }, { status: 401 });
@@ -46,9 +46,9 @@ function generateRandom16DigitNumber(): string {
     }
   
     return randomNumber;
-  }
+}
 
-  export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
         const req = await request.json(); // Await the JSON parsing
         const { userID, PIN, Email } = req;
@@ -60,10 +60,17 @@ function generateRandom16DigitNumber(): string {
         const existingUser = await prisma.user.findFirst({
             where: { email: Email },
         });
-
         if (!existingUser) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
+        const existingUserID = await prisma.user.findFirst({
+            where: { userID: userID },
+        });
+
+        if (existingUserID) {
+            return NextResponse.json({ message: 'UserID already exists' }, { status: 409 });
+        }
+        
         const hashedPin = await bcrypt.hash(PIN.toString(), 10);
 
         await prisma.user.update({
@@ -74,6 +81,7 @@ function generateRandom16DigitNumber(): string {
                 userID: userID,
             },
         });
+
         await prisma.account.create({
             data: {
                 Account_number: generateRandom16DigitNumber(),
@@ -82,7 +90,6 @@ function generateRandom16DigitNumber(): string {
                 PIN: hashedPin,  
             },
         });
-
 
         return NextResponse.json({ message: "Account Created" }, { status: 201 });
     } catch (error) {

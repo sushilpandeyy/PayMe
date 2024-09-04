@@ -5,9 +5,10 @@ import { useSession } from "next-auth/react";
 import "../globals.css";
 import OpenAccount from "./Openaccount";
 import CreditCard from "./CreditCard"; 
+import { redirect } from "next/navigation";
 
 interface Accounttype {
-  Account_number: string; // Changed to lowercase 'string'
+  Account_number: string; 
   Account_Holder: string;
   UserID: string;
 }
@@ -34,6 +35,13 @@ export default function AccountCreate() {
     fetchAccount();
   }, [sessioninfo]);
 
+  function Red(){
+    redirect("/openacc")
+    return <>
+    <OpenAccount/>
+    </>
+  }
+
   return (
     <Card className="p-4 h-max">
       <CardContent>
@@ -41,7 +49,7 @@ export default function AccountCreate() {
           {accountStatus === "loading" ? (
             <div>Loading...</div>
           ) : accountStatus === "no" ? (
-            <OpenAccount />
+            <Red/>
           ) : (
             <CreditCard account={accountStatus} />
           )}
