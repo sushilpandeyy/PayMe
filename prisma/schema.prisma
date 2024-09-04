@@ -44,6 +44,12 @@ model Account {
   updatedAt       DateTime @updatedAt
 }
 
+model Drop {
+  DropID      String @id @default(uuid())
+  Receiver_id String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 enum AuthType {
   Google
   Github
