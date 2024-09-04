@@ -15,41 +15,47 @@ interface Accounttype {
 
 export default function AccountCreate() {
   const [accountStatus, setAccountStatus] = useState<Accounttype | "loading" | "no">("loading");
-  const { data: sessioninfo } = useSession();
+  const { data: sessioninfo, status: sessionStatus } = useSession();
 
   useEffect(() => {
     async function fetchAccount() {
-      try {
-        const response = await axios.get(`/api/user/account?email=${sessioninfo?.user?.email}`);
-        if (response.data) {
-          setAccountStatus(response.data);
-        } else {
+      if (sessionStatus === "authenticated") {
+        try {
+          const response = await axios.get(`/api/p/user/account?email=${sessioninfo?.user?.email}`);
+          if (response.data) {
+            setAccountStatus(response.data);
+          } else {
+            setAccountStatus("no");
+          }
+        } catch (error) {
+          console.log(error);
           setAccountStatus("no");
         }
-      } catch (error) {
-        console.log(error);
-        setAccountStatus("no");
       }
     }
 
-    fetchAccount();
-  }, [sessioninfo]);
+    if (sessionStatus !== "loading") {
+      fetchAccount();
+    }
+  }, [sessioninfo, sessionStatus]);
 
-  function Red(){
-    redirect("/openacc")
-    return <>
-    <OpenAccount/>
-    </>
+  function Red() {
+    redirect("/openacc");
+    return (
+      <>
+        <OpenAccount />
+      </>
+    );
   }
 
   return (
     <Card className="p-4 h-max">
       <CardContent>
         <div className="flex content-center justify-center">
-          {accountStatus === "loading" ? (
+          {sessionStatus === "loading" || accountStatus === "loading" ? (
             <div>Loading...</div>
           ) : accountStatus === "no" ? (
-            <Red/>
+            <Red />
           ) : (
             <CreditCard account={accountStatus} />
           )}

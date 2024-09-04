@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
+import { useSession, signOut } from "next-auth/react"
 import {
   Dialog,
   DialogContent,
@@ -16,19 +18,51 @@ import { Button } from "../../components/ui/button";
 import { CreditCardIcon } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
+import { redirect } from "next/navigation";
 
 function AccountOpen() {
   const [userID, setUserID] = useState("");
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
+  const [email, setEmail] = useState("");
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const sessioninf= useSession();
+
+  const red= () => {
+    toast({
+      title: "Success",
+      description: "Account Created Successfully!",
+    });
+    redirect("/dashboard")
+    console.log("Account Created");
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validatePins(pin, confirmPin)) {
       return;
     }
-    console.log("Account Created:", { userID, pin });
+    try {
+      const response = await axios.post('/api/p/user/account', {
+        userID: userID,
+        PIN: pin,
+        Email: sessioninf.data?.user?.email,
+      });
+
+      if (response.status === 201) {
+        red
+      } else {
+        toast({
+          title: "Error",
+          description: response.data.message || "Failed to create account.",
+          variant: "destructive",
+        });
+        console.log("Error:", response.data);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
