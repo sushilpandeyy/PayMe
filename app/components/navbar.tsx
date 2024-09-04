@@ -1,7 +1,7 @@
 "use client";
 import {Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {Button} from "@/components/ui/button"
-import {House, IndianRupee, ArrowLeftRight} from "lucide-react"
+import {House, IndianRupee, ArrowLeftRight, LineChart, Home, ShoppingCart, Badge, Package, Users} from "lucide-react"
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import Link from "next/link";
 
@@ -11,6 +11,26 @@ type NavbarProps = {
 
 export default function Navbar({selected}: NavbarProps){
     return <nav className="gap-1 p-4 py-6 w-min">
+      <Link 
+      href="/dashboard"
+      className={(selected=="Home"?"flex items-center gap-3 rounded-xl bg-muted px-3 py-2 text-primary transition-all hover:text-primary mb-2":"flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary mb-2")}>
+      <House className="size-5" />
+        Home
+      </Link>
+      <Link 
+      href="/transfer"
+      className={(selected=="Transfer"?"flex items-center gap-3 rounded-xl bg-muted px-3 py-2 text-primary transition-all hover:text-primary my-2":"flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary my-2")}>
+      <IndianRupee className="size-5" />
+        Transfer
+      </Link>
+      <Link 
+      href="/transaction"
+      className={(selected=="Transaction"?"flex items-center gap-3 rounded-xl bg-muted px-3 py-2 text-primary transition-all hover:text-primary my-2":"flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary my-2")}>
+      <ArrowLeftRight className="size-5" />
+        Transactions
+      </Link>
+    </nav>
+    /*<nav className="gap-1 p-4 py-6 w-min">
       <TooltipProvider>
         <div className="py-4">
         <Tooltip >
@@ -70,5 +90,5 @@ export default function Navbar({selected}: NavbarProps){
           </Tooltip>
           </div>
        </TooltipProvider>
-    </nav>
+    </nav>*/
 }
