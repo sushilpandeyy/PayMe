@@ -2,7 +2,6 @@
 import {Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {Button} from "@/components/ui/button"
 import {House, IndianRupee, ArrowLeftRight, LineChart, Home, ShoppingCart, Badge, Package, Users} from "lucide-react"
-import { TooltipProvider } from "@radix-ui/react-tooltip";
 import Link from "next/link";
 
 type NavbarProps = {
