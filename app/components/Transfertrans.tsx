@@ -8,6 +8,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Copy, Share } from "lucide-react";
 import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+function Pinbox(){
+  const handlePIN = async () => {
+    try {
+      const response = await axios.post(`/api/p/transaction/`);
+      if (response.status === 200) {
+        
+        console.log("Verified")
+      }
+      else {
+        
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  return <Dialog>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Are you absolutely sure?</DialogTitle>
+      <DialogDescription>
+        This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers.
+      </DialogDescription>
+    </DialogHeader>
+  </DialogContent>
+</Dialog>
+
+}
 
 export default function Transfertrans() {
   const [userID, setUserID] = useState("");
@@ -20,6 +58,7 @@ export default function Transfertrans() {
       if (response.status === 200) {
         setVerificationStatus("verified");
         console.log("Verified")
+        Pinbox
       } else if(response.status === 201){
         setVerificationStatus("Low");
       }
