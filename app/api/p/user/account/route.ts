@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
         if (!Email) {
             throw new Error("Email is Required");
         }
-
         const existingUser = await prisma.user.findFirst({
             where: { email: Email },
         });
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
         const existingUserID = await prisma.user.findFirst({
             where: { userID: userID },
         });
-
         if (existingUserID) {
             return NextResponse.json({ message: 'UserID already exists' }, { status: 409 });
         }
@@ -76,7 +74,6 @@ export async function POST(request: NextRequest) {
                 userID: userID,
             },
         });
-
         await prisma.account.create({
             data: {
                 Account_number: generateRandom16DigitNumber(),
@@ -85,7 +82,6 @@ export async function POST(request: NextRequest) {
                 PIN: hashedPin,  
             },
         });
-
         return NextResponse.json({ message: "Account Created" }, { status: 201 });
     } catch (error) {
         console.error('Internal Server Error: ', error);
@@ -120,6 +116,38 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ message: 'PIN does not match' }, { status: 206 });
         }
     } catch (error) {
+        console.error('Internal Server Error: ', error);
+        return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
+    }
+}
+
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const req = await request.json();  
+        const { userID } = req;
+        const existingAccount = await prisma.account.findFirst({
+            where: { userID: userID },
+        });
+        if (!existingAccount) {
+            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        }
+         await prisma.account.delete({
+             where: {
+                 Account_number: existingAccount.Account_number,  
+             }
+         });
+         await prisma.user.update({
+            where:{
+                userID: userID
+            },
+            data: {
+                name: ""
+            }
+         })
+         return NextResponse.json({ message: 'PIN updated successfully' }, { status: 200 });
+        } 
+    catch (error) {
         console.error('Internal Server Error: ', error);
         return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
     }

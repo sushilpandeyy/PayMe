@@ -16,7 +16,7 @@ export function UpdatePin() {
   const [newPin, setNewPin] = useState("");
   const [confirmNewPin, setConfirmNewPin] = useState("");
   const { toast } = useToast();
-  const [dialogOpen, setDialogOpen] = useState(true);  
+  const [dialogOpen, setDialogOpen] = useState(false);  
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
