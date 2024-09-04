@@ -7,6 +7,7 @@ import Transfertrans from '../components/Transfertrans';
 import BalanceGraph from '../components/ui/BalanceGraph';
 import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
+import ChangePinButton from "../components/Updatepincomp"
 
 export default function Transfer() {
 const a= useSession();
@@ -29,10 +30,7 @@ if(a.status=="unauthenticated"){
     <center>
     <BalanceGraph/>
     <div className="m-10">
-    <Button>
-        <Lock className="h-6 w-6" />
-        <span className="sr-only sm:not-sr-only">Change PIN</span>
-    </Button>
+    <ChangePinButton/>
       </div>
     </center>
   </div>
