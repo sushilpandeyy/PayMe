@@ -15,54 +15,113 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
-function Pinbox(){
-  const handlePIN = async () => {
-    try {
-      const response = await axios.post(`/api/p/transaction/`);
-      if (response.status === 200) {
-        
-        console.log("Verified")
-      }
-      else {
-        
-      }
-    } catch (error) {
-      console.error("Error:", error);
+interface PinInputModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const PinInputModal = ({ isOpen, onClose }: PinInputModalProps) => {
+  const [pin, setPin] = useState<string>("");
+
+  const handleDigitInput = (digit: string) => {
+    if (pin.length < 4) {
+      setPin((prevPin) => prevPin + digit);
     }
   };
 
-  return <Dialog>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Are you absolutely sure?</DialogTitle>
-      <DialogDescription>
-        This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.
-      </DialogDescription>
-    </DialogHeader>
-  </DialogContent>
-</Dialog>
+  const handleBackspace = () => {
+    setPin((prevPin) => prevPin.slice(0, -1));
+  };
 
-}
+  const handleSubmit = () => {
+    if (pin.length === 4) {
+      console.log("Submitted PIN:", pin);
+      setPin("");
+      onClose();
+    } else {
+      alert("Please enter a 4-digit PIN");
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="text-center p-6">
+        <DialogHeader>
+          <DialogTitle>Enter Your 4-Digit PIN</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex justify-center items-center mb-4">
+          <input
+            type="password"
+            value={pin}
+            className="text-center text-3xl p-2 w-24 border-b-2 border-gray-500"
+            readOnly
+            maxLength={4}
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+            <Button
+              key={digit}
+              variant="outline"
+              className="text-2xl h-16 w-16"
+              onClick={() => handleDigitInput(digit.toString())}
+            >
+              {digit}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            className="h-16 w-16"
+            onClick={handleBackspace}
+          >
+            ⌫
+          </Button>
+          <Button
+            variant="outline"
+            className="text-2xl h-16 w-16"
+            onClick={() => handleDigitInput("0")}
+          >
+            0
+          </Button>
+          <Button
+            className="h-16 w-16"
+            onClick={handleSubmit}
+          >
+            ✔
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default function Transfertrans() {
   const [userID, setUserID] = useState("");
   const [amount, setAmount] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "verified" | "Low" | "notFound" | "error">("idle");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+  
   const handleSend = async () => {
     try {
       const response = await axios.get(`/api/p/transaction/verify?id=${userID}&amt=${amount}`);
       if (response.status === 200) {
         setVerificationStatus("verified");
-        console.log("Verified")
-        Pinbox
+        handleOpenModal();  // Open the PIN modal after verification
       } else if(response.status === 201){
         setVerificationStatus("Low");
-      }
-      else {
+      } else {
         setVerificationStatus("notFound");
       }
     } catch (error) {
@@ -85,7 +144,7 @@ export default function Transfertrans() {
               <Card>
                 <CardHeader>
                   <CardTitle>Send Money</CardTitle>
-                  <CardDescription>Send money to any userid</CardDescription>
+                  <CardDescription>Send money to any userID</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="space-y-1">
@@ -112,11 +171,9 @@ export default function Transfertrans() {
                   <Button onClick={handleSend}>Send</Button>
                 </CardFooter>
               </Card>
-              {/* Conditional Rendering Based on API Response */}
+
               {verificationStatus === "verified" && (
-                <div className="mt-4 text-green-500">
-                  Account verified! Proceed with the transaction.
-                </div>
+                <PinInputModal isOpen={isModalOpen} onClose={handleCloseModal} />
               )}
               {verificationStatus === "notFound" && (
                 <div className="mt-4 text-red-500">
