@@ -3,6 +3,8 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardTitle, CardHeader } from "@/components/ui/card";
 import { IndianRupee, ArrowDownUp, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 
+
+
 function TotalBalCard(){
     return <Card className="p-4 h-max">
             <CardHeader className="flex flex-row items-center justify-between pb-2">

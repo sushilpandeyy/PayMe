@@ -3,18 +3,22 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest, { params }: { params: { userid: string } }) {
-    const { userid } = params;
+export async function GET(req: NextRequest, { params }: { params: { em: string } }) {
+    const { em } = params;
 
     try {
         const existingUser = await prisma.user.findFirst({
-            where: { userID: userid },
-        });
-        const existingAccount = await prisma.account.findFirst({
-            where: { userID: userid },
+            where: { email: em },
         });
         if (!existingUser) {
             return NextResponse.json({ message: 'User not found' }, { status: 403 });
+        }
+        const userid: string | undefined = existingUser?.userID !== null ? existingUser?.userID : undefined;
+        const existingAccount = await prisma.account.findFirst({
+            where: { userID: userid },
+        });
+        if (!existingAccount) {
+            return NextResponse.json({ message: 'Account not found' }, { status: 403 });
         }
 
         let transactionscount = 0;
@@ -54,6 +58,7 @@ export async function GET(req: NextRequest, { params }: { params: { userid: stri
         });
 
         return NextResponse.json({
+            "email": existingUser.email,
             "user": existingUser.userID,
             "Accountno": existingAccount?.Account_number,
             "Balance": existingAccount?.Balance,
