@@ -3,35 +3,35 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
     try {
-        const req = await request.json();
-        const { userID, PIN, Email } = req;
-        const existingUser = await prisma.user.findFirst({
-            where: { email: Email },
-        });
-        if (!existingUser) {
-            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        const email = request.nextUrl.searchParams.get("email");
+        if (!email) {
+            return NextResponse.json({ message: 'Email is required' }, { status: 400 });
         }
-        const existingUserID = await prisma.user.findFirst({
-            where: { userID: userID },
-        });
-        if (existingUserID) {
-            return NextResponse.json({ message: 'UserID already exists' }, { status: 409 });
-        }
-        await prisma.user.update({
+        const user = await prisma.user.findUnique({
             where: {
-                email: Email,
-            },
-            data: {
-                userID: userID,
+                email: email,
             },
         });
-        return NextResponse.json({ message: "Account Created" }, { status: 201 });
+        if (user?.userID) {
+            const account = await prisma.account.findFirst({
+                where: {
+                    userID: user?.userID
+                },
+            });
+            if(account){
+               return NextResponse.json({
+                    Account_number: account.Account_number,
+                    Account_Holder: user?.name,
+                    UserID: account.userID
+                }, { status: 200 });
+            }
+        } else {
+            return NextResponse.json({ message: 'Account Not Created' }, { status: 401 });
+        }
     } catch (error) {
         console.error('Internal Server Error: ', error);
         return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
     }
 }
-

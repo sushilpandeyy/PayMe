@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
             await tx.transactions.create({
                 data: {
                     Amount: 10000,
-                    Type: "Credit",
                     Sender_Id: "Drop_Payme",
                     Receiver_Id: existingUser.userID,
                     Category: "Drop",

@@ -24,7 +24,6 @@ model User {
 model Transactions {
   Transaction_id String  @id @default(uuid())
   Amount         Int     
-  Type           String
   Sender_Id      String  
   Receiver_Id    String     
   Category       String
