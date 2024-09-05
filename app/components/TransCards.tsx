@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Card, CardContent, CardDescription, CardTitle, CardHeader } from "@/components/ui/card";
-import { IndianRupee, ArrowDownUp } from "lucide-react";
+import { IndianRupee, ArrowDownUp, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 
 function TotalBalCard(){
     return <Card className="p-4 h-max">
@@ -33,7 +33,7 @@ function TotalBalCard(){
     return <Card className="p-4 h-max">
     <CardHeader className="flex flex-row items-center justify-between pb-2">
       <CardTitle className="text-sm font-medium">Incoming</CardTitle>
-      <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
+      <ArrowDownToLine className="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>
       <div className="text-2xl font-bold">+2350</div>
@@ -46,7 +46,7 @@ function TotalBalCard(){
     return <Card className="p-4 h-max">
     <CardHeader className="flex flex-row items-center justify-between pb-2">
       <CardTitle className="text-sm font-medium">Spend</CardTitle>
-      <ArrowDownUp className="h-4 w-4 text-muted-foreground" />
+      <ArrowUpFromLine className="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>
       <div className="text-2xl font-bold">+2350</div>

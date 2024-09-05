@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import axios from "axios";
-import { useSession, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation"; // Import useRouter for client-side redirection
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogPortal
+  DialogPortal,
 } from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -19,25 +20,14 @@ import { Button } from "../../components/ui/button";
 import { CreditCardIcon } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
-import { redirect } from "next/navigation";
 
 function AccountOpen() {
   const [userID, setUserID] = useState("");
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
-  const [email, setEmail] = useState("");
   const { toast } = useToast();
-
-  const sessioninf= useSession();
-
-  const red= () => {
-    toast({
-      title: "Success",
-      description: "Account Created Successfully!",
-    });
-    redirect("/dashboard")
-    console.log("Account Created");
-  }
+  const { data: session } = useSession(); // Destructure the session data
+  const router = useRouter(); // Use router for client-side navigation
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,14 +35,18 @@ function AccountOpen() {
       return;
     }
     try {
-      const response = await axios.post('/api/p/user/account', {
+      const response = await axios.post("/api/p/user/account", {
         userID: userID,
         PIN: pin,
-        Email: sessioninf.data?.user?.email,
+        Email: session?.user?.email, // Use session data safely
       });
 
       if (response.status === 201) {
-        red
+        toast({
+          title: "Success",
+          description: "Account Created Successfully!",
+        });
+        router.push("/dashboard");
       } else {
         toast({
           title: "Error",
@@ -62,6 +56,11 @@ function AccountOpen() {
         console.log("Error:", response.data);
       }
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create account..",
+        variant: "destructive",
+      });
       console.error("Error:", error);
     }
   };
