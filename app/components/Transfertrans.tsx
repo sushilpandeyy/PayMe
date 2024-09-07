@@ -52,22 +52,24 @@ const PinInputModal = ({ isOpen, onClose }: PinInputModalProps) => {
           <DialogTitle>Enter Your 4-Digit PIN</DialogTitle>
         </DialogHeader>
 
+        {/* PIN input */}
         <div className="flex justify-center items-center mb-4">
           <input
             type="password"
             value={pin}
-            className="text-center text-3xl p-2 w-24 border-b-2 border-gray-500"
+            className="text-center text-3xl p-2 w-24 border-b-2 border-gray-500 text-black" // added 'text-black' here
             readOnly
             maxLength={4}
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        {/* Classic Keyboard-like button layout with line breaks after 3 buttons */}
+        <div className="flex flex-wrap justify-center max-w-[180px] mx-auto">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
             <Button
               key={digit}
               variant="outline"
-              className="text-2xl h-16 w-16"
+              className="text-2xl h-14 w-14 rounded-full flex justify-center items-center"
               onClick={() => handleDigitInput(digit.toString())}
             >
               {digit}
@@ -75,20 +77,20 @@ const PinInputModal = ({ isOpen, onClose }: PinInputModalProps) => {
           ))}
           <Button
             variant="outline"
-            className="h-16 w-16"
+            className="h-14 w-14 rounded-full flex justify-center items-center"
             onClick={handleBackspace}
           >
             ⌫
           </Button>
           <Button
             variant="outline"
-            className="text-2xl h-16 w-16"
+            className="text-2xl h-14 w-14 rounded-full flex justify-center items-center"
             onClick={() => handleDigitInput("0")}
           >
             0
           </Button>
           <Button
-            className="h-16 w-16"
+            className="h-14 w-14 rounded-full flex justify-center items-center"
             onClick={handleSubmit}
           >
             ✔
