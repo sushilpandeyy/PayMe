@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -78,4 +79,62 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+//Transaction POST API
+
+export async function POST(Req:NextRequest, Res: NextResponse){
+  try {
+    const req = await Req.json();
+    const { Sender_Id, Receiver_Id, Amount, Category, PIN } = req;
+    if (!Sender_Id) {
+        throw new Error("Sender_Id is Required");
+    }
+    if (!Receiver_Id) {
+      throw new Error("Receiver_Id is Required");
+  }
+  if (!Amount) {
+    throw new Error("Amount is Required");
+}
+if (!Category) {
+  throw new Error("Category is Required");
+}
+const user = await prisma.account.findFirst({
+  where: {
+    userID: Sender_Id,
+  },
+});
+if (!user || !user.PIN) {
+  throw new Error("User not found or PIN not set.");
+}
+
+const storedHashedPin = user.PIN;
+
+const isMatch = await bcrypt.compare(PIN, storedHashedPin);
+
+if (!isMatch) {
+  return NextResponse.json({ message: 'Incorrect Pin' }, { status: 401 });
+}
+await prisma.$transaction(async (tx) => {
+  const result = await tx.account.findFirst({
+    where: {
+      userID: Receiver_Id,
+    },
+  });
+  const bal: number = result ? result.Balance : 0;
+
+  await tx.transactions.create({
+      data: {
+          Amount: bal,
+          Sender_Id: Sender_Id,
+          Receiver_Id: Receiver_Id,
+          Category: Category,
+      },
+  });
+});
+return NextResponse.json({ message: 'Sucessfull Transaction' }, { status: 201 });
+} catch (error) {
+    console.error('Internal Server Error: ', error);
+    return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
+}
 }
