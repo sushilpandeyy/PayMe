@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
+// GET Request: Fetch user data, balance, and transaction summary
 export async function GET(req: NextRequest) {
   const em: string | null = req.nextUrl.searchParams.get("id");
 
@@ -81,60 +82,117 @@ export async function GET(req: NextRequest) {
   }
 }
 
-//Transaction POST API
-
-export async function POST(Req:NextRequest, Res: NextResponse){
+// POST Request: Handle Transaction
+export async function POST(Req: NextRequest, Res: NextResponse) {
   try {
     const req = await Req.json();
     const { Sender_Id, Receiver_Id, Amount, Category, PIN } = req;
-    if (!Sender_Id) {
-        throw new Error("Sender_Id is Required");
+
+    if (!Sender_Id) throw new Error("Sender_Id is Required");
+    if (!Receiver_Id) throw new Error("Receiver_Id is Required");
+    if (!Amount) throw new Error("Amount is Required");
+    if (!Category) throw new Error("Category is Required");
+
+    const parsedAmount = parseInt(Amount, 10); // Convert Amount to an integer
+
+    if (isNaN(parsedAmount)) {
+      throw new Error("Invalid amount. Must be a valid number.");
     }
-    if (!Receiver_Id) {
-      throw new Error("Receiver_Id is Required");
-  }
-  if (!Amount) {
-    throw new Error("Amount is Required");
-}
-if (!Category) {
-  throw new Error("Category is Required");
-}
-const user = await prisma.account.findFirst({
-  where: {
-    userID: Sender_Id,
-  },
-});
-if (!user || !user.PIN) {
-  throw new Error("User not found or PIN not set.");
-}
 
-const storedHashedPin = user.PIN;
+    const userfromemail = await prisma.user.findFirst({
+      where: {
+        email: Sender_Id,
+      },
+    });
 
-const isMatch = await bcrypt.compare(PIN, storedHashedPin);
+    if (!userfromemail?.userID) {
+      throw new Error("User ID is missing");
+    }
 
-if (!isMatch) {
-  return NextResponse.json({ message: 'Incorrect Pin' }, { status: 401 });
-}
-await prisma.$transaction(async (tx) => {
-  const result = await tx.account.findFirst({
-    where: {
-      userID: Receiver_Id,
-    },
-  });
-  const bal: number = result ? result.Balance : 0;
+    const user = await prisma.account.findFirst({
+      where: {
+        userID: userfromemail.userID,
+      },
+    });
 
-  await tx.transactions.create({
-      data: {
-          Amount: bal,
-          Sender_Id: Sender_Id,
+    if (!user || !user.PIN) {
+      throw new Error("User not found or PIN not set.");
+    }
+
+    const storedHashedPin = user.PIN;
+    const isMatch = await bcrypt.compare(PIN, storedHashedPin);
+
+    if (!isMatch) {
+      return NextResponse.json({ message: 'Incorrect Pin' }, { status: 401 });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const receiverAccount = await tx.account.findFirst({
+        where: {
+          userID: Receiver_Id,
+        },
+      });
+
+      if (!receiverAccount) {
+        throw new Error("Receiver account not found");
+      }
+      if (!userfromemail?.userID) {
+        throw new Error("User ID is missing");
+      }
+      const senderAccount = await tx.account.findFirst({
+        where: {
+          userID: userfromemail?.userID,
+        },
+      });
+
+      if (!senderAccount) {
+        throw new Error("Sender account not found");
+      }
+
+      if (senderAccount.Balance < parsedAmount) {
+        throw new Error("Insufficient balance");
+      }
+      if (!userfromemail?.userID) {
+        throw new Error("User ID is missing");
+      }
+      // Create transaction
+      await tx.transactions.create({
+        data: {
+          Amount: parsedAmount,
+          Sender_Id: userfromemail.userID,
           Receiver_Id: Receiver_Id,
           Category: Category,
-      },
-  });
-});
-return NextResponse.json({ message: 'Sucessfull Transaction' }, { status: 201 });
-} catch (error) {
+        },
+      });
+
+      // Update sender's account (decrement balance)
+      await tx.account.update({
+        where: {
+          Account_number: senderAccount.Account_number,
+        },
+        data: {
+          Balance: {
+            decrement: parsedAmount,
+          },
+        },
+      });
+
+      // Update receiver's account (increment balance)
+      await tx.account.update({
+        where: {
+          Account_number: receiverAccount.Account_number,
+        },
+        data: {
+          Balance: {
+            increment: parsedAmount,
+          },
+        },
+      });
+    });
+
+    return NextResponse.json({ message: 'Successful Transaction' }, { status: 201 });
+  } catch (error) {
     console.error('Internal Server Error: ', error);
     return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
-}
+  }
 }

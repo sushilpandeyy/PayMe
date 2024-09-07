@@ -7,7 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Copy, Share } from "lucide-react";
-import axios from "axios";
+import axios from "axios"
+import { useSession } from "next-auth/react";
+;
 import {
   Dialog,
   DialogContent,
@@ -20,9 +22,12 @@ import {
 interface PinInputModalProps {
   isOpen: boolean;
   onClose: () => void;
+  userID: string; // Accept userID as a prop
+  amount: string; // Accept amount as a prop
 }
 
-const PinInputModal = ({ isOpen, onClose }: PinInputModalProps) => {
+const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) => {
+  const dataa = useSession();
   const [pin, setPin] = useState<string>("");
 
   const handleDigitInput = (digit: string) => {
@@ -35,9 +40,31 @@ const PinInputModal = ({ isOpen, onClose }: PinInputModalProps) => {
     setPin((prevPin) => prevPin.slice(0, -1));
   };
 
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     if (pin.length === 4) {
       console.log("Submitted PIN:", pin);
+      // You can now use `userID` and `amount` here for any API requests or further processing
+      console.log("UserID:", userID, "Amount:", amount);
+      
+
+      try {
+        const response = await axios.post("/api/p/transaction/account", {
+          Sender_Id: dataa.data?.user?.email, 
+          Receiver_Id: userID, 
+          Amount: amount, 
+          Category: "test", 
+          PIN: pin,
+        });
+
+      } catch (error) {
+        console.error("Error:", error);
+      }
+
+      
+      // Example: You can make a POST request to the server to process the transaction using the PIN
+      // const response = await axios.post('/api/transaction/verify-pin', { userID, amount, pin });
+
       setPin("");
       onClose();
     } else {
@@ -57,7 +84,7 @@ const PinInputModal = ({ isOpen, onClose }: PinInputModalProps) => {
           <input
             type="password"
             value={pin}
-            className="text-center text-3xl p-2 w-24 border-b-2 border-gray-500 text-black" // added 'text-black' here
+            className="text-center text-3xl p-2 w-24 border-b-2 border-gray-500 text-black" 
             readOnly
             maxLength={4}
           />
@@ -120,7 +147,7 @@ export default function Transfertrans() {
       const response = await axios.get(`/api/p/transaction/verify?id=${userID}&amt=${amount}`);
       if (response.status === 200) {
         setVerificationStatus("verified");
-        handleOpenModal();  // Open the PIN modal after verification
+        handleOpenModal();  
       } else if(response.status === 201){
         setVerificationStatus("Low");
       } else {
@@ -175,7 +202,12 @@ export default function Transfertrans() {
               </Card>
 
               {verificationStatus === "verified" && (
-                <PinInputModal isOpen={isModalOpen} onClose={handleCloseModal} />
+                <PinInputModal 
+                  isOpen={isModalOpen} 
+                  onClose={handleCloseModal} 
+                  userID={userID}   
+                  amount={amount}  
+                />
               )}
               {verificationStatus === "notFound" && (
                 <div className="mt-4 text-red-500">
