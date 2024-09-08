@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from '@prisma/client';
-import { useSearchParams } from 'next/navigation'
+import  qs from 'qs';
 
 const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
     try {
-        const searchParams = useSearchParams()
-        const email = searchParams.get("email");
+        const rawParams = request.url.split('?')[1];
+        const params = qs.parse(rawParams);
+        const email = request.nextUrl.searchParams.get('email');
         if (!email) {
             return NextResponse.json({ message: 'Email is required' }, { status: 400 });
         }
