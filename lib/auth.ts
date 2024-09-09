@@ -4,12 +4,17 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcrypt";
 import { pages } from "next/dist/build/templates/app-page";
 import GoogleProvider from "next-auth/providers/google"
+import GitHubProvider from "next-auth/providers/github"
 
 export const authOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.Google_CID ?? "",
             clientSecret: process.env.Google_Client ?? ""
+        }),
+        GitHubProvider({
+          clientId: process.env.GITHUB_ID ?? "",
+          clientSecret: process.env.GITHUB_SECRET ?? ""
         }),
     //  CredentialsProvider({
     //      name: 'Email',
