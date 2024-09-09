@@ -39,3 +39,4 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
     }
 }
+
