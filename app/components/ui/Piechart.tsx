@@ -98,7 +98,7 @@ export function Piecharthead() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {totalVisitors}
                         </tspan>
                         <tspan
                           x={viewBox.cx}

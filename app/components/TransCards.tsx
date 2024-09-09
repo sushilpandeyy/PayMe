@@ -11,7 +11,7 @@ function TotalBalCard({ balance, user }: { balance: number, user: string }) {
                 <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">₹{balance.toLocaleString()}</div>
+                <div className="text-2xl font-bold">₹{balance}</div>
                 <p className="text-xs text-muted-foreground">Balance for {user}</p>
             </CardContent>
         </Card>
@@ -41,7 +41,7 @@ function InCard({ credit }: { credit: number }) {
                 <ArrowDownToLine className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">₹{credit.toLocaleString()}</div>
+                <div className="text-2xl font-bold">₹{credit}</div>
                 <p className="text-xs text-muted-foreground">Total Incoming</p>
             </CardContent>
         </Card>
@@ -56,7 +56,7 @@ function OutCard({ debit }: { debit: number }) {
                 <ArrowUpFromLine className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">₹{debit.toLocaleString()}</div>
+                <div className="text-2xl font-bold">₹{debit}</div>
                 <p className="text-xs text-muted-foreground">Total Spent</p>
             </CardContent>
         </Card>
