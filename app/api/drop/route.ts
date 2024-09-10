@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
       // Find user's account
       const account = await prisma.account.findFirst({
         where: {
-          userID: user.userID,
+          userID: "dropbox",
         },
       });
   
