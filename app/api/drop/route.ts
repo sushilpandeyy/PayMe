@@ -53,6 +53,21 @@ export async function POST(req: NextRequest, res: NextResponse) {
           Category: 'Drop Money',
         },
       });
+      const accounti = await prisma.account.findFirst({
+        where: {
+          userID: user.userID
+        }
+      });
+      await prisma.account.update({
+        where: {
+         Account_number: accounti?.Account_number
+        },
+        data: {
+          Balance: {
+            increment: 10000,  
+          },
+        },
+      });
   
       return NextResponse.json({ message: 'Successful Transaction' }, { status: 201 });
     } catch (error) {
