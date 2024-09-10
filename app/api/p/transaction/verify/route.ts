@@ -25,11 +25,23 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'Invalid amount' }, { status: 400 });
         }
 
-        const user = await prisma.account.findFirst({
-            where: {
-                userID: id,
-            },
-        });
+        const accountd = await prisma.user.findFirst({
+        where: {
+            email: id,
+        }
+        })
+        if (!accountd) {
+            return NextResponse.json({ message: 'Account not found' }, { status: 402 });
+        }
+        if (accountd?.userID) {
+            var user = await prisma.account.findFirst({
+                where: {
+                    userID: accountd.userID, // Now it's guaranteed to be a string
+                },
+            });
+        } else {
+            throw new Error("User ID is missing");
+        }
 
         if (user?.userID) {
             if (user.Balance >= amt) {

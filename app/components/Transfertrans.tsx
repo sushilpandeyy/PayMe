@@ -129,6 +129,7 @@ const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) 
 };
 
 export default function Transfertrans() {
+  const dataa = useSession();
   const [userID, setUserID] = useState("");
   const [amount, setAmount] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "verified" | "Low" | "notFound" | "error">("idle");
@@ -144,7 +145,7 @@ export default function Transfertrans() {
   
   const handleSend = async () => {
     try {
-      const response = await axios.get(`/api/p/transaction/verify?id=${userID}&amt=${amount}`);
+      const response = await axios.get(`/api/p/transaction/verify?id=${dataa?.data?.user?.email}&amt=${amount}`);
       if (response.status === 200) {
         setVerificationStatus("verified");
         handleOpenModal();  
