@@ -33,9 +33,9 @@ export async function GET(request: NextRequest) {
 
         if (user?.userID) {
             if (user.Balance >= amt) {
-                return NextResponse.json({ message: 'Low balance' }, { status: 201 });
-            } else {
                 return NextResponse.json({ message: 'Account is there and balance is sufficient' }, { status: 200 });
+            } else {
+                return NextResponse.json({ message: 'Low balance' }, { status: 201 });
             }
         } else {
             return NextResponse.json({ message: 'UserID is not there' }, { status: 404 });
