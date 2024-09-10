@@ -8,10 +8,10 @@ import GitHubProvider from "next-auth/providers/github"
 
 export const authOptions = {
     providers: [
-        GoogleProvider({
-            clientId: process.env.Google_CID ?? "",
-            clientSecret: process.env.Google_Client ?? ""
-        }),
+       // GoogleProvider({
+       //     clientId: process.env.Google_CID ?? "",
+       //     clientSecret: process.env.Google_Client ?? ""
+       // }),
         GitHubProvider({
           clientId: process.env.GITHUB_ID ?? "",
           clientSecret: process.env.GITHUB_SECRET ?? ""
@@ -87,9 +87,9 @@ export const authOptions = {
             data: {
               email: user.email,
               name: user.name || "User",
-              auth_type: "Google",
+              auth_type: "Github",
               image: user.image || "",
-              password: "Google"
+              password: "Github"
             },
           });
         } else {

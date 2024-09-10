@@ -48,7 +48,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
       await prisma.transactions.create({
         data: {
           Amount: 10000,
-          Sender_Id: 'dropbox', // Hardcoded sender ID as per your requirement
+          Sender_Id: 'dropbox', 
           Receiver_Id: user.userID,
           Category: 'Drop Money',
         },

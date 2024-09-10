@@ -28,7 +28,7 @@ if(a.status=="unauthenticated"){
   </div>
   <div className="flex flex-col p-12">
     <center>
-    <BalanceGraph/>
+    Box
     <div className="m-10">
     <ChangePinButton/>
       </div>
