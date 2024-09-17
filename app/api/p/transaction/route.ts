@@ -1,42 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from '@prisma/client';
-import qs from 'qs';
 export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
     try {
-        const rawParams = request.url.split('?')[1];
-        const params = qs.parse(rawParams);
-        const email = params.email as string | undefined;
-        if (!email) {
-            return NextResponse.json({ message: 'Email is required' }, { status: 400 });
-        }
-        const user = await prisma.user.findUnique({
-            where: {
-                email: email,
-            },
-        });
-        if (user?.userID) {
-            const account = await prisma.account.findFirst({
-                where: {
-                    userID: user?.userID
-                },
-            });
-            if(account){
-               return NextResponse.json({
-                    Account_number: account.Account_number,
-                    Account_Holder: user?.name,
-                    UserID: account.userID
-                }, { status: 200 });
-            }
-        } else {
-            return NextResponse.json({ message: 'Account Not Created' }, { status: 401 });
-        }
+       
     } catch (error) {
         console.error('Internal Server Error: ', error);
         return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
     }
 }
 
+//Gets Transaction from a Specific Date to a Specific Date 
+export async function POST(req: NextRequest, res: NextResponse){
+    const bodydata = await req.json();
+    const {startdate, enddate, mail} = bodydata;
+    if (!startdate) throw new Error("Startdate is Required");
+    if (!enddate) throw new Error("End date is Required");
+    if(!mail) throw new Error("mail is Required");
+    try {
+        const usernamedata = await prisma.user.findFirst({
+            where: {
+              email: mail,
+            },
+          });
+          if(!usernamedata) throw new Error("user does not exsists");
+          const datatransaction = await prisma.transactions.findMany({
+            where: {
+                AND: [
+                    {
+                        OR: [
+                            {
+                                Sender_Id: usernamedata?.userID || ""
+                            },
+                            {
+                                Receiver_Id: usernamedata?.userID || ""
+                            }
+                        ]
+                    },
+                    {
+                        createdAt: {
+                            gte: new Date(startdate).toISOString(),  
+                            lte: new Date(enddate).toISOString()     
+                        }
+                    }
+                ]
+            },
+            orderBy: {
+                createdAt: 'desc' 
+            }
+        });
+        return NextResponse.json({data: datatransaction}, {status: 200})
+    }
+    catch(error){
+        console.error('Internal Server Error: ', error);
+        return NextResponse.json({ message: 'Oops, some error occurred 😓' }, { status: 500 });
+    }
+}
