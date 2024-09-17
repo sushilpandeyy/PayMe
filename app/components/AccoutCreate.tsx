@@ -16,21 +16,28 @@ interface AccountType {
 export default function AccountCreate() {
   const [accountStatus, setAccountStatus] = useState<AccountType | "loading" | "no">("loading");
   const { data: sessioninfo, status: sessionStatus } = useSession();
-  const router = useRouter(); // useRouter for redirection instead of redirect
+  const router = useRouter(); 
 
   useEffect(() => {
     async function fetchAccount() {
       if (sessionStatus === "authenticated") {
-        try {
-          const response = await axios.get(`/api/p/user/account?email=${sessioninfo?.user?.email}`);
-          if (response.data) {
-            setAccountStatus(response.data);
-          } else {
+        const cachedAccount = sessionStorage.getItem("accountData");
+        if (cachedAccount) {
+          // Use cached data if available
+          setAccountStatus(JSON.parse(cachedAccount));
+        } else {
+          try {
+            const response = await axios.get(`/api/p/user/account?email=${sessioninfo?.user?.email}`);
+            if (response.data) {
+              sessionStorage.setItem("accountData", JSON.stringify(response.data)); // Cache response in sessionStorage
+              setAccountStatus(response.data);
+            } else {
+              setAccountStatus("no");
+            }
+          } catch (error) {
+            console.log(error);
             setAccountStatus("no");
           }
-        } catch (error) {
-          console.log(error);
-          setAccountStatus("no");
         }
       }
     }
