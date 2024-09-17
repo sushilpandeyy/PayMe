@@ -52,7 +52,7 @@ export async function POST(req: NextRequest, res: NextResponse){
                 createdAt: 'desc' 
             }
         });
-        return NextResponse.json({data: datatransaction}, {status: 200})
+        return NextResponse.json({data: datatransaction, username: usernamedata.userID}, {status: 200})
     }
     catch(error){
         console.error('Internal Server Error: ', error);
