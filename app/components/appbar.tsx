@@ -2,26 +2,45 @@
 
 import { useSession } from "next-auth/react";
 import { Provider } from "../provider";
-import { Avatar,AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import Loginbtn from "./ui/Loginbtn";
 import { Logindrop } from "./ui/Loginbtn";
-
+import { useEffect, useState } from "react";
 
 const Logg = () => {
-    const { data: session } = useSession();
-    const img = session?.user?.image || "https://github.com/shadcn.png";
+    const { data: session, status: sessionStatus } = useSession();
+    const [cachedSession, setCachedSession] = useState<any>(null);
+
+    useEffect(() => {
+        // Check session storage for cached session data
+        const cachedSessionData = sessionStorage.getItem("sessionData");
+        if (cachedSessionData) {
+            setCachedSession(JSON.parse(cachedSessionData)); // Use cached session data
+        }
+
+        if (sessionStatus === "authenticated" && session) {
+            // Cache session data in sessionStorage if available
+            sessionStorage.setItem("sessionData", JSON.stringify(session));
+            setCachedSession(session); // Update the cached session state
+        }
+    }, [session, sessionStatus]);
+
+    // Use the cached session if available, otherwise use the session from useSession hook
+    const displaySession = cachedSession || session;
+    const img = displaySession?.user?.image || "https://github.com/shadcn.png";
+
     return (
         <>
             <div>
-                {session ? (
-                  <Logindrop>
-                  <Avatar>
-                    <AvatarImage src={img} alt={session?.user?.name || "Payme user"} className="rounded-full w-14 h-14" />
-                    <AvatarFallback>{session?.user?.name}</AvatarFallback>
-                  </Avatar>
-                </Logindrop>
+                {displaySession ? (
+                    <Logindrop>
+                        <Avatar>
+                            <AvatarImage src={img} alt={displaySession?.user?.name || "Payme user"} className="rounded-full w-14 h-14" />
+                            <AvatarFallback>{displaySession?.user?.name}</AvatarFallback>
+                        </Avatar>
+                    </Logindrop>
                 ) : (
-                    <Loginbtn/>
+                    <Loginbtn />
                 )}
             </div>
         </>
@@ -31,14 +50,12 @@ const Logg = () => {
 export default function Appbar() {
     return (
         <Provider>
-        <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
-            <h1 className="text-4xl">
-                PayMe
-            </h1>
-            <div>
-                <Logg />
+            <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
+                <h1 className="text-4xl">PayMe</h1>
+                <div>
+                    <Logg />
+                </div>
             </div>
-        </div>
         </Provider>
     );
 }

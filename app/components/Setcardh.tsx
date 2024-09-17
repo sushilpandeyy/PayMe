@@ -5,21 +5,34 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 
 export default function Setcardh() {
-  const { data: session, status } = useSession();  
+  const { data: session, status } = useSession();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
-        const cachedData = sessionStorage.getItem("transactionData");
-        if (cachedData) {
-          setData(JSON.parse(cachedData)); // Use cached data
+      // Check if session data is cached in sessionStorage
+      let cachedSession = sessionStorage.getItem("sessionData");
+      if (!cachedSession && session) {
+        // Cache session data if not already cached
+        sessionStorage.setItem("sessionData", JSON.stringify(session));
+        cachedSession = JSON.stringify(session);
+      }
+
+      // Parse the cached session data
+      const cachedSessionData = cachedSession ? JSON.parse(cachedSession) : null;
+
+      if (status === "authenticated" && cachedSessionData) {
+        const cachedTransactionData = sessionStorage.getItem("transactionData");
+        if (cachedTransactionData) {
+          setData(JSON.parse(cachedTransactionData)); // Use cached transaction data
           setLoading(false);
         } else {
           try {
-            const response = await axios.get('api/p/transaction/account?id=' + session?.user?.email);
+            const response = await axios.get(
+              'api/p/transaction/account?id=' + cachedSessionData.user.email
+            );
             sessionStorage.setItem("transactionData", JSON.stringify(response.data)); // Cache response
             setData(response.data);
             setLoading(false);
@@ -35,7 +48,7 @@ export default function Setcardh() {
   }, [session, status]);
 
   if (status === "loading") {
-    return <div>Loading session...</div>;  
+    return <div>Loading session...</div>;
   }
 
   if (loading) return <div>Loading data...</div>;
@@ -59,14 +72,27 @@ export function Headcards() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
-        const cachedData = sessionStorage.getItem("transactionData");
-        if (cachedData) {
-          setData(JSON.parse(cachedData)); // Use cached data
+      // Check if session data is cached in sessionStorage
+      let cachedSession = sessionStorage.getItem("sessionData");
+      if (!cachedSession && session) {
+        // Cache session data if not already cached
+        sessionStorage.setItem("sessionData", JSON.stringify(session));
+        cachedSession = JSON.stringify(session);
+      }
+
+      // Parse the cached session data
+      const cachedSessionData = cachedSession ? JSON.parse(cachedSession) : null;
+
+      if (status === "authenticated" && cachedSessionData) {
+        const cachedTransactionData = sessionStorage.getItem("transactionData");
+        if (cachedTransactionData) {
+          setData(JSON.parse(cachedTransactionData)); // Use cached transaction data
           setLoading(false);
         } else {
           try {
-            const response = await axios.get('api/p/transaction/account?id=' + session?.user?.email);
+            const response = await axios.get(
+              'api/p/transaction/account?id=' + cachedSessionData.user.email
+            );
             sessionStorage.setItem("transactionData", JSON.stringify(response.data)); // Cache response
             setData(response.data);
             setLoading(false);
