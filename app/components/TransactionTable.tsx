@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { addDays, format, subMonths } from "date-fns";
+import { format, subMonths } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -17,43 +17,47 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { useSession } from "next-auth/react";
 
 const today = new Date();
 const oneMonthAgo = subMonths(today, 1);
 
-function DatePickerWithRange({
-  className,
-}: React.HTMLAttributes<HTMLDivElement>) {
+interface Transaction {
+  Transaction_id: string;
+  Amount: number;
+  Sender_Id: string;
+  Receiver_Id: string;
+  Category: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+function DatePickerWithRange({ onDateChange }: { onDateChange: (date: DateRange | undefined) => void }) {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: oneMonthAgo, 
-    to: today,         
+    to: today,
   });
-  const { data: session, status: sessionStatus } = useSession();
+
   useEffect(() => {
     if (date) {
-      console.log(`From: ${format(date.from!, "yyyy-MM-dd")}`);
-      if (date.to) {
-        console.log(`To: ${format(date.to, "yyyy-MM-dd")}`);
-      }
+      onDateChange(date);
     }
-  }, [date]);  
+  }, [date, onDateChange]);
 
   return (
-    <div className={cn("grid gap-2 rounded-xl", className)}>
+    <div className={cn("grid gap-2 rounded-xl")}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -95,55 +99,75 @@ function DatePickerWithRange({
 }
 
 export default function TransactionTable() {
+  const { data: session } = useSession();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  const fetchTransactions = async (date: DateRange | undefined) => {
+    if (!session || !date?.from || !date?.to) return;
+
+    const response = await fetch("/api/p/transaction", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        startdate: format(date.from, "yyyy-MM-dd"),
+        enddate: format(date.to, "yyyy-MM-dd"),
+        mail: session.user?.email,
+      }),
+    });
+
+    const result = await response.json();
+    setTransactions(result.data);
+  };
+
   return (
     <div className="p-4">
-      <DatePickerWithRange />
+      <DatePickerWithRange onDateChange={fetchTransactions} />
       <div className="pt-2">
-      <Card x-chunk="dashboard-05-chunk-3">
-    <CardHeader className="px-7">
-      <CardTitle>Transactions</CardTitle>
-      <CardDescription>
-        Recent Transactions
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Transaction ID</TableHead>
-            <TableHead className="hidden sm:table-cell">
-            Counterparty
-            </TableHead>
-            <TableHead className="hidden sm:table-cell">
-            Type
-            </TableHead>
-            <TableHead className="hidden md:table-cell">
-              Category
-            </TableHead>
-            <TableHead className="hidden md:table-cell">
-              Date
-            </TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow className="bg-accent">
-            <TableCell>
-              <div className="font-medium">Liam Johnson</div>
-            </TableCell>
-            <TableCell className="hidden sm:table-cell">
-              Sale
-            </TableCell>
-            <TableCell className="hidden md:table-cell">
-              2023-06-23
-            </TableCell>
-            <TableCell className="text-right">$250.00</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
-  </div>
+        <Card>
+          <CardHeader className="px-7">
+            <CardTitle>Transactions</CardTitle>
+            <CardDescription>Recent Transactions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Transaction ID</TableHead>
+                  <TableHead className="hidden sm:table-cell">Sender</TableHead>
+                  <TableHead className="hidden sm:table-cell">Receiver</TableHead>
+                  <TableHead className="hidden md:table-cell">Category</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.map((transaction) => (
+                  <TableRow key={transaction.Transaction_id}>
+                    <TableCell>{transaction.Transaction_id}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {transaction.Sender_Id}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {transaction.Receiver_Id}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {transaction.Category}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {new Date(transaction.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ${transaction.Amount}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
