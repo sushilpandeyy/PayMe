@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format, subMonths } from "date-fns";
 import { DateRange } from "react-day-picker";
@@ -63,6 +63,13 @@ function DatePickerWithRange({
     }
   }, [date, onDateChange]);
 
+  const resetDateRange = () => {
+    setDate({
+      from: oneMonthAgo,
+      to: today,
+    });
+  };
+
   return (
     <div className={cn("grid gap-2 rounded-xl")}>
       <Popover>
@@ -75,7 +82,7 @@ function DatePickerWithRange({
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
             {date?.from ? (
               date.to ? (
                 <>
@@ -101,42 +108,55 @@ function DatePickerWithRange({
           />
         </PopoverContent>
       </Popover>
+      <Button onClick={resetDateRange} className="mt-2">
+        Reset Date Range
+      </Button>
     </div>
   );
 }
 
 export default function TransactionTable() {
   const { data: session } = useSession();
-  const [transactions, setTransactions] = useState<TransactionResponse | null>(null);
+  const [transactions, setTransactions] = useState<TransactionResponse | null>(
+    null
+  );
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: oneMonthAgo,
     to: today,
   });
-  const initialLoad = useRef(true); // Track if this is the initial load
- 
-  const fetchTransactions = async (date: DateRange | undefined) => {
-    if (!session || !date?.from || !date?.to) return;
+  const [loading, setLoading] = useState(false);
+  const initialLoad = useRef(true);
 
-    try {
-      const response = await fetch("/api/p/transaction", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          startdate: format(date.from, "yyyy-MM-dd"),
-          enddate: format(date.to, "yyyy-MM-dd"),
-          mail: session.user?.email,
-        }),
-      });
+  const fetchTransactions = useCallback(
+    async (date: DateRange | undefined) => {
+      if (!session || !date?.from || !date?.to) return;
 
-      const result: TransactionResponse = await response.json();
-      setTransactions(result);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-    }
-  };
-  //fetchTransactions(dateRange);
+      setLoading(true); // Start loading
+
+      try {
+        const response = await fetch("/api/p/transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            startdate: format(date.from, "yyyy-MM-dd"),
+            enddate: format(date.to, "yyyy-MM-dd"),
+            mail: session.user?.email,
+          }),
+        });
+
+        const result: TransactionResponse = await response.json();
+        setTransactions(result);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    },
+    [session]
+  );
+
   useEffect(() => {
     // Only fetch transactions if not on initial load or if the date changes
     if (initialLoad.current) {
@@ -145,7 +165,7 @@ export default function TransactionTable() {
     } else {
       fetchTransactions(dateRange); // Fetch on date change
     }
-  }, [dateRange]);
+  }, [dateRange, fetchTransactions]);
 
   const handleDateChange = (date: DateRange | undefined) => {
     setDateRange(date); // Set new date range which triggers useEffect
@@ -161,40 +181,52 @@ export default function TransactionTable() {
             <CardDescription>Recent Transactions</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Transaction ID</TableHead>
-                  <TableHead className="hidden sm:table-cell">Counterparty</TableHead>
-                  <TableHead className="hidden sm:table-cell">Type</TableHead>
-                  <TableHead className="hidden md:table-cell">Category</TableHead>
-                  <TableHead className="hidden md:table-cell">Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions?.data.map((transaction) => (
-                  <TableRow key={transaction.Transaction_id}>
-                    <TableCell>{transaction.Transaction_id}</TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {transaction.Sender_Id === transactions.username
-                        ? transaction.Receiver_Id
-                        : transaction.Sender_Id}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {transaction.Sender_Id === transactions.username ? "Debit" : "Credit"}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {transaction.Category}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {new Date(transaction.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">₹{transaction.Amount}</TableCell>
+            {loading ? (
+              <p>Loading transactions...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Transaction ID</TableHead>
+                    <TableHead className="hidden sm:table-cell">
+                      Counterparty
+                    </TableHead>
+                    <TableHead className="hidden sm:table-cell">Type</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Category
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">Date</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {transactions?.data.map((transaction, index) => (
+                    <TableRow key={`${transaction.Transaction_id}-${index}`}>
+                      <TableCell>{transaction.Transaction_id}</TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {transaction.Sender_Id === transactions.username
+                          ? transaction.Receiver_Id
+                          : transaction.Sender_Id}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {transaction.Sender_Id === transactions.username
+                          ? "Debit"
+                          : "Credit"}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {transaction.Category}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {new Date(transaction.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ₹{transaction.Amount}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest, res: NextResponse){
                     {
                         createdAt: {
                             gte: new Date(startdate).toISOString(),  
-                            lte: new Date(enddate).toISOString()     
+                            lte: new Date(new Date(enddate).setDate(new Date(enddate).getDate() + 1)).toISOString()     
                         }
                     }
                 ]
