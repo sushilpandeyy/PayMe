@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format, subMonths } from "date-fns";
 import { DateRange } from "react-day-picker";
@@ -56,18 +56,24 @@ function DatePickerWithRange({
     to: today,
   });
 
-  useEffect(() => {
-    if (date) {
-      onDateChange(date);
-    }
-  }, [date, onDateChange]);
+  const handleDateChange = useCallback(
+    (newDate: DateRange | undefined) => {
+      setDate(newDate);
+      onDateChange(newDate);
+    },
+    [onDateChange]
+  );
 
-  const resetDateRange = () => {
+  const resetDateRange = useCallback(() => {
     setDate({
       from: oneMonthAgo,
       to: today,
     });
-  };
+    onDateChange({
+      from: oneMonthAgo,
+      to: today,
+    });
+  }, [onDateChange]);
 
   return (
     <div className={cn("grid gap-2 rounded-xl")}>
@@ -85,8 +91,7 @@ function DatePickerWithRange({
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
+                  {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
                 </>
               ) : (
                 format(date.from, "LLL dd, y")
@@ -102,7 +107,7 @@ function DatePickerWithRange({
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={setDate}
+            onSelect={handleDateChange}
             numberOfMonths={2}
           />
         </PopoverContent>
@@ -115,8 +120,13 @@ function DatePickerWithRange({
 }
 
 export default function TransactionTable() {
-  const sessionData = typeof window !== "undefined" ? sessionStorage.getItem("sessionData") : null;
-  const session = sessionData ? JSON.parse(sessionData) : null;
+  const sessionData = useMemo(() => {
+    if (typeof window !== "undefined") {
+      const storedSession = sessionStorage.getItem("sessionData");
+      return storedSession ? JSON.parse(storedSession) : null;
+    }
+    return null;
+  }, []);
 
   const [transactions, setTransactions] = useState<TransactionResponse | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -128,7 +138,7 @@ export default function TransactionTable() {
 
   const fetchTransactions = useCallback(
     async (date: DateRange | undefined) => {
-      if (!session || !date?.from || !date?.to) return;
+      if (!sessionData || !date?.from || !date?.to) return;
 
       setLoading(true); // Start loading
 
@@ -141,7 +151,7 @@ export default function TransactionTable() {
           body: JSON.stringify({
             startdate: format(date.from, "yyyy-MM-dd"),
             enddate: format(date.to, "yyyy-MM-dd"),
-            mail: session.user?.email,
+            mail: sessionData.user?.email,
           }),
         });
 
@@ -153,11 +163,11 @@ export default function TransactionTable() {
         setLoading(false); // Stop loading
       }
     },
-    [session]
+    [sessionData]
   );
 
   useEffect(() => {
-    // Only fetch transactions if not on initial load or if the date changes
+    // Fetch transactions only when initial load or date changes
     if (initialLoad.current) {
       fetchTransactions(dateRange); // Initial fetch
       initialLoad.current = false;
@@ -166,9 +176,9 @@ export default function TransactionTable() {
     }
   }, [dateRange, fetchTransactions]);
 
-  const handleDateChange = (date: DateRange | undefined) => {
+  const handleDateChange = useCallback((date: DateRange | undefined) => {
     setDateRange(date); // Set new date range which triggers useEffect
-  };
+  }, []);
 
   return (
     <div className="p-4">
@@ -187,13 +197,9 @@ export default function TransactionTable() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Transaction ID</TableHead>
-                    <TableHead className="hidden sm:table-cell">
-                      Counterparty
-                    </TableHead>
+                    <TableHead className="hidden sm:table-cell">Counterparty</TableHead>
                     <TableHead className="hidden sm:table-cell">Type</TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Category
-                    </TableHead>
+                    <TableHead className="hidden md:table-cell">Category</TableHead>
                     <TableHead className="hidden md:table-cell">Date</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
@@ -208,19 +214,13 @@ export default function TransactionTable() {
                           : transaction.Sender_Id}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        {transaction.Sender_Id === transactions.username
-                          ? "Debit"
-                          : "Credit"}
+                        {transaction.Sender_Id === transactions.username ? "Debit" : "Credit"}
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {transaction.Category}
-                      </TableCell>
+                      <TableCell className="hidden md:table-cell">{transaction.Category}</TableCell>
                       <TableCell className="hidden md:table-cell">
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-right">
-                        ₹{transaction.Amount}
-                      </TableCell>
+                      <TableCell className="text-right">₹{transaction.Amount}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
