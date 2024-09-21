@@ -27,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useSession } from "next-auth/react";
 
 const today = new Date();
 const oneMonthAgo = subMonths(today, 1);
@@ -116,10 +115,10 @@ function DatePickerWithRange({
 }
 
 export default function TransactionTable() {
-  const { data: session } = useSession();
-  const [transactions, setTransactions] = useState<TransactionResponse | null>(
-    null
-  );
+  const sessionData = typeof window !== "undefined" ? sessionStorage.getItem("sessionData") : null;
+  const session = sessionData ? JSON.parse(sessionData) : null;
+
+  const [transactions, setTransactions] = useState<TransactionResponse | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: oneMonthAgo,
     to: today,

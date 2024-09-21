@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import Appbar from "./components/appbar";
 import { Provider } from "./provider";

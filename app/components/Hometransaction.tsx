@@ -26,7 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useSession } from "next-auth/react";
 import { subWeeks } from "date-fns";
 
 interface Transaction {
@@ -38,16 +37,19 @@ interface Transaction {
 }
 
 export default function HomeTransaction() {
-  const { data: session, status } = useSession();
+  // Retrieve session data from sessionStorage
+  const sessionData = typeof window !== "undefined" ? sessionStorage.getItem("sessionData") : null;
+  const session = sessionData ? JSON.parse(sessionData) : null;
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<string[]>(["Credit", "Debit", "Error"]);
   const [loading, setLoading] = useState(false);
-  const [noTransactions, setNoTransactions] = useState(false); // New state for no transactions
+  const [noTransactions, setNoTransactions] = useState(false); // State for no transactions
   const initialLoad = useRef(true);
 
   // Helper function to fetch transactions
   const fetchTransactions = async () => {
-    if (status !== "authenticated" || !session?.user?.email) return;
+    if (!session || !session.user?.email) return;
 
     setLoading(true); // Start loading state
     const today = new Date();
@@ -60,8 +62,8 @@ export default function HomeTransaction() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: session.user?.email,
-          startdate: oneWeekAgo, // Corrected date range (start is one week ago)
+          email: session.user.email,
+          startdate: oneWeekAgo, // Start date is one week ago
           enddate: today,
         }),
       });
@@ -80,13 +82,13 @@ export default function HomeTransaction() {
     }
   };
 
-  // Fetch transactions on first load or session change
+  // Fetch transactions on first load
   useEffect(() => {
-    if (initialLoad.current && status === "authenticated") {
-      fetchTransactions();
+    if (initialLoad.current) {
+      fetchTransactions(); // Initial fetch
       initialLoad.current = false;
     }
-  }, [status, session]); // Ensure the effect runs when the session or status changes
+  }, []); // Empty dependency array ensures it runs once on component mount
 
   // Toggle filter function
   const toggleFilter = (type: string) => {

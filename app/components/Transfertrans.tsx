@@ -7,9 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Copy, Share } from "lucide-react";
-import axios from "axios"
-import { useSession } from "next-auth/react";
-;
+import axios from "axios";
+
 import {
   Dialog,
   DialogContent,
@@ -27,7 +26,6 @@ interface PinInputModalProps {
 }
 
 const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) => {
-  const dataa = useSession();
   const [pin, setPin] = useState<string>("");
 
   const handleDigitInput = (digit: string) => {
@@ -40,30 +38,29 @@ const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) 
     setPin((prevPin) => prevPin.slice(0, -1));
   };
 
-
   const handleSubmit = async () => {
     if (pin.length === 4) {
       console.log("Submitted PIN:", pin);
-      // You can now use `userID` and `amount` here for any API requests or further processing
-      console.log("UserID:", userID, "Amount:", amount);
-      
+      // Retrieve session data from sessionStorage
+      const sessionData = sessionStorage.getItem("sessionData");
+      if (!sessionData) {
+        alert("Session not found. Please log in again.");
+        return;
+      }
+      const session = JSON.parse(sessionData);
 
       try {
         const response = await axios.post("/api/p/transaction/account", {
-          Sender_Id: dataa.data?.user?.email, 
+          Sender_Id: session?.user?.email, // Use the session's user email
           Receiver_Id: userID, 
           Amount: amount, 
           Category: "test", 
           PIN: pin,
         });
-
+        // Handle response if needed
       } catch (error) {
         console.error("Error:", error);
       }
-
-      
-      // Example: You can make a POST request to the server to process the transaction using the PIN
-      // const response = await axios.post('/api/transaction/verify-pin', { userID, amount, pin });
 
       setPin("");
       onClose();
@@ -129,7 +126,6 @@ const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) 
 };
 
 export default function Transfertrans() {
-  const dataa = useSession();
   const [userID, setUserID] = useState("");
   const [amount, setAmount] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "verified" | "Low" | "notFound" | "error">("idle");
@@ -142,10 +138,18 @@ export default function Transfertrans() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-  
+
   const handleSend = async () => {
+    // Retrieve session data from sessionStorage
+    const sessionData = sessionStorage.getItem("sessionData");
+    if (!sessionData) {
+      alert("Session not found. Please log in again.");
+      return;
+    }
+    const session = JSON.parse(sessionData);
+
     try {
-      const response = await axios.get(`/api/p/transaction/verify?id=${dataa?.data?.user?.email}&amt=${amount}`);
+      const response = await axios.get(`/api/p/transaction/verify?id=${session?.user?.email}&amt=${amount}`);
       if (response.status === 200) {
         setVerificationStatus("verified");
         handleOpenModal();  
