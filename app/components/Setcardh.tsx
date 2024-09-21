@@ -25,21 +25,26 @@ export default function Setcardh() {
 
       if (status === "authenticated" && cachedSessionData) {
         const cachedTransactionData = sessionStorage.getItem("transactionData");
-        if (cachedTransactionData) {
-          setData(JSON.parse(cachedTransactionData)); // Use cached transaction data
-          setLoading(false);
-        } else {
-          try {
-            const response = await axios.get(
-              'api/p/transaction/account?id=' + cachedSessionData.user.email
-            );
-            sessionStorage.setItem("transactionData", JSON.stringify(response.data)); // Cache response
-            setData(response.data);
-            setLoading(false);
-          } catch (err) {
-            setError("Failed to load data");
-            setLoading(false);
+
+        try {
+          const response = await axios.get(
+            `api/p/transaction/account?id=${cachedSessionData.user.email}`
+          );
+
+          const transactionData = response.data;
+
+          // Compare new transaction data with cached data
+          if (!cachedTransactionData || JSON.stringify(transactionData) !== cachedTransactionData) {
+            // Update cache if data is different
+            sessionStorage.setItem("transactionData", JSON.stringify(transactionData));
+            setData(transactionData);
+          } else {
+            setData(JSON.parse(cachedTransactionData)); // Use cached transaction data
           }
+          setLoading(false);
+        } catch (err) {
+          setError("Failed to load data");
+          setLoading(false);
         }
       }
     };
@@ -85,21 +90,26 @@ export function Headcards() {
 
       if (status === "authenticated" && cachedSessionData) {
         const cachedTransactionData = sessionStorage.getItem("transactionData");
-        if (cachedTransactionData) {
-          setData(JSON.parse(cachedTransactionData)); // Use cached transaction data
-          setLoading(false);
-        } else {
-          try {
-            const response = await axios.get(
-              'api/p/transaction/account?id=' + cachedSessionData.user.email
-            );
-            sessionStorage.setItem("transactionData", JSON.stringify(response.data)); // Cache response
-            setData(response.data);
-            setLoading(false);
-          } catch (err) {
-            setError("Failed to load data");
-            setLoading(false);
+
+        try {
+          const response = await axios.get(
+            `api/p/transaction/account?id=${cachedSessionData.user.email}`
+          );
+
+          const transactionData = response.data;
+
+          // Compare new transaction data with cached data
+          if (!cachedTransactionData || JSON.stringify(transactionData) !== cachedTransactionData) {
+            // Update cache if data is different
+            sessionStorage.setItem("transactionData", JSON.stringify(transactionData));
+            setData(transactionData);
+          } else {
+            setData(JSON.parse(cachedTransactionData)); // Use cached transaction data
           }
+          setLoading(false);
+        } catch (err) {
+          setError("Failed to load data");
+          setLoading(false);
         }
       }
     };
