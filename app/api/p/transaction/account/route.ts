@@ -4,7 +4,13 @@ import bcrypt from "bcrypt";
 import axios from "axios";
 
 const prisma = new PrismaClient();
-const today = new Date();
+
+// Helper function to construct the full API URL
+const getApiBaseUrl = (req: NextRequest): string => {
+  const protocol = req.headers.get("x-forwarded-proto") || "http";
+  const host = req.headers.get("host");
+  return `${protocol}://${host}`;
+};
 
 // GET Request: Fetch user data, balance, and transaction summary
 export async function GET(req: NextRequest) {
@@ -85,7 +91,7 @@ export async function GET(req: NextRequest) {
 }
 
 // POST Request: Handle Transaction
-export async function POST(Req: NextRequest, Res: NextResponse) {
+export async function POST(Req: NextRequest) {
   try {
     const req = await Req.json();
     const { Sender_Id, Receiver_Id, Amount, Category, PIN } = req;
@@ -138,12 +144,10 @@ export async function POST(Req: NextRequest, Res: NextResponse) {
       if (!receiverAccount) {
         throw new Error("Receiver account not found");
       }
-      if (!userfromemail?.userID) {
-        throw new Error("User ID is missing");
-      }
+
       const senderAccount = await tx.account.findFirst({
         where: {
-          userID: userfromemail?.userID,
+          userID: userfromemail?.userID || "",
         },
       });
 
@@ -154,14 +158,12 @@ export async function POST(Req: NextRequest, Res: NextResponse) {
       if (senderAccount.Balance < parsedAmount) {
         throw new Error("Insufficient balance");
       }
-      if (!userfromemail?.userID) {
-        throw new Error("User ID is missing");
-      }
+
       // Create transaction
       await tx.transactions.create({
         data: {
           Amount: parsedAmount,
-          Sender_Id: userfromemail.userID,
+          Sender_Id: userfromemail.userID || "",
           Receiver_Id: Receiver_Id,
           Category: Category,
         },
@@ -179,7 +181,6 @@ export async function POST(Req: NextRequest, Res: NextResponse) {
         },
       });
 
-
       // Update receiver's account (increment balance)
       await tx.account.update({
         where: {
@@ -192,24 +193,32 @@ export async function POST(Req: NextRequest, Res: NextResponse) {
         },
       });
 
+      // Fetch the receiver user account for the email
       const recAccount = await tx.user.findFirst({
         where: {
           userID: Receiver_Id,
         },
       });
-      await axios.post("/api/p/notify/transaction",{
-        "message": "Notifications added successfully",
-        "recipientEmail": recAccount?.email,
-        "notifications": [
+
+      // Send notification asynchronously (non-blocking)
+      const today = new Date().toISOString();
+      const apiUrl = `${getApiBaseUrl(Req)}/api/notify/transaction`; // Build the absolute URL
+
+      axios.post(apiUrl, {
+        message: "Notifications added successfully",
+        recipientEmail: recAccount?.email,
+        notifications: [
           {
-            "title": "Payment Received",
-            "amount": Amount,
-            "username": senderAccount.userID,
-            "timestamp": today,
-            "viewed": false
-          }
-        ]
-      })
+            title: "Payment Received",
+            amount: Amount,
+            username: userfromemail.userID,
+            timestamp: today,
+            viewed: false,
+          },
+        ],
+      }).catch((error) => {
+        console.error('Failed to send notification:', error);
+      });
     });
 
     return NextResponse.json({ message: 'Successful Transaction' }, { status: 201 });

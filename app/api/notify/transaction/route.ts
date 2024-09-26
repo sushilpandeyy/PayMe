@@ -1,4 +1,4 @@
-import { redisClient, connectRedis } from '../../../../../lib/redis';
+import { redisClient, connectRedis } from '../../../../lib/redis';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface Notification {
@@ -16,27 +16,40 @@ interface NotificationEmail {
 
 connectRedis();
 
+// Helper function to add new notifications to Redis
+async function addNewNotifications(recipientEmail: string, notifications: Notification[]): Promise<Notification[]> {
+    // Fetch existing notifications from Redis
+    const existingNotificationsString: string | null = await redisClient.get(recipientEmail);
+
+    // Parse the existing notifications if available, or initialize an empty array
+    let existingNotifications: Notification[] = existingNotificationsString
+        ? JSON.parse(existingNotificationsString)
+        : [];
+
+    // Add timestamp and viewed status to each new notification
+    const newNotifications = notifications.map((notification) => ({
+        ...notification,
+        timestamp: new Date().toISOString(),
+        viewed: false,
+    }));
+
+    // Merge existing and new notifications
+    const updatedNotifications = [...existingNotifications, ...newNotifications];
+
+    // Save the updated notifications in Redis with an expiration time
+    await redisClient.set(recipientEmail, JSON.stringify(updatedNotifications), { EX: 3600 });
+
+    return updatedNotifications;
+}
+
+// POST: Add new notifications
 export async function POST(req: NextRequest) {
     try {
         const body: NotificationEmail = await req.json();
         const { recipientEmail, notifications } = body;
 
-        // Fetch existing notifications from Redis
-        const existingNotificationsString: string | null = await redisClient.get(recipientEmail);
-
-        // Parse the existing notifications if available, or initialize an empty array
-        let existingNotifications: Notification[] = existingNotificationsString
-            ? JSON.parse(existingNotificationsString)
-            : [];
-
-        // Add timestamp and viewed status to each new notification
-        const newNotifications = notifications.map((notification) => ({
-            ...notification,
-            timestamp: new Date().toISOString(),
-            viewed: false,
-        }));
-        let updatedNotifications = [...existingNotifications, ...newNotifications];
-        await redisClient.set(recipientEmail, JSON.stringify(updatedNotifications), { EX: 3600 });
+        // Use the helper function to add new notifications
+        const updatedNotifications = await addNewNotifications(recipientEmail, notifications);
 
         return NextResponse.json({
             message: 'Notifications added successfully',
@@ -48,6 +61,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to add notifications' }, { status: 500 });
     }
 }
+
 // GET: Retrieve notifications from Redis
 export async function GET(req: NextRequest) {
     try {
@@ -152,3 +166,5 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to delete notifications' }, { status: 500 });
     }
 }
+
+export { addNewNotifications };
