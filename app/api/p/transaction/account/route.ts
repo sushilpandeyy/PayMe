@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import axios from "axios";
 
 const prisma = new PrismaClient();
+const today = new Date();
 
 // GET Request: Fetch user data, balance, and transaction summary
 export async function GET(req: NextRequest) {
@@ -177,6 +179,7 @@ export async function POST(Req: NextRequest, Res: NextResponse) {
         },
       });
 
+
       // Update receiver's account (increment balance)
       await tx.account.update({
         where: {
@@ -188,6 +191,25 @@ export async function POST(Req: NextRequest, Res: NextResponse) {
           },
         },
       });
+
+      const recAccount = await tx.user.findFirst({
+        where: {
+          userID: Receiver_Id,
+        },
+      });
+      await axios.post("/api/p/notify/transaction",{
+        "message": "Notifications added successfully",
+        "recipientEmail": recAccount?.email,
+        "notifications": [
+          {
+            "title": "Payment Received",
+            "amount": Amount,
+            "username": senderAccount.userID,
+            "timestamp": today,
+            "viewed": false
+          }
+        ]
+      })
     });
 
     return NextResponse.json({ message: 'Successful Transaction' }, { status: 201 });
