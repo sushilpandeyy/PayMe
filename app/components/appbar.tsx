@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import Loginbtn from "./ui/Loginbtn";
 import { Logindrop } from "./ui/Loginbtn";
 import { useEffect, useState } from "react";
+import Notification from "./ui/Notification";
 
 const Logg = () => {
     const { data: session, status: sessionStatus } = useSession();
@@ -52,7 +53,10 @@ export default function Appbar() {
         <Provider>
             <div className="flex justify-between items-center p-4 bg-gray-800 text-white">
                 <h1 className="text-4xl">PayMe</h1>
-                <div>
+                <div className="flex  justify-between items-center">
+                    <div className="mr-4">
+                   <Notification/>
+                    </div>
                     <Logg />
                 </div>
             </div>
