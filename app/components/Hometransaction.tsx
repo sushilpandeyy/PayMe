@@ -84,6 +84,7 @@ export default function HomeTransaction() {
 
   // Fetch transactions on first load
   useEffect(() => {
+    
     if (initialLoad.current) {
       fetchTransactions(); // Initial fetch
       initialLoad.current = false;

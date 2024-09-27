@@ -24,33 +24,45 @@ interface NotificationItem {
   viewed: boolean;
 }
 
-
 export default function Notification() {
+  console.log("IT RAm")
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Ensure this runs in the browser (client-side)
+    const fetchNotifications = async (email: string) => {
+      try {
+        const response = await axios.get(`/api/notify/transaction?email=`+email);
+        console.log(response.data)
+        if (response.data.notifications) {
+          setNotifications(response.data.notifications);
+        } else {
+          setNotifications([]); // Set to empty if no notifications
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Ensure this runs client-side
     if (typeof window !== "undefined") {
-      // Get email from session storage
       const sessionData = sessionStorage.getItem("sessiondata");
-      const email = sessionData ? JSON.parse(sessionData).user.email : null;
-      console.log(email)
+      let email = null;
+
+      try {
+        if (sessionData) {
+          const parsedData = JSON.parse(sessionData);
+          email = parsedData?.user?.email || null;
+          console.log(email)
+        }
+      } catch (error) {
+        console.error("Error parsing session data:", error);
+      }
+
       if (email) {
-        // Fetch notifications from the API using axios
-        axios
-          .get(`api/notify/transaction?email=${email}`)
-          .then((response) => {
-            if (response.data.notifications) {
-              setNotifications(response.data.notifications);
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching notifications:", error);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        fetchNotifications(email);
       } else {
         setLoading(false); // Stop loading if no email found
       }

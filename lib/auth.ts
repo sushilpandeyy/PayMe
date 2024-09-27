@@ -1,118 +1,74 @@
 import { PrismaClient } from "@prisma/client";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GitHubProvider from "next-auth/providers/github";
+import { User } from "next-auth";  // Import the User type from next-auth
+
 const db = new PrismaClient();
-import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcrypt";
-import { pages } from "next/dist/build/templates/app-page";
-import GoogleProvider from "next-auth/providers/google"
-import GitHubProvider from "next-auth/providers/github"
-import TwitterProvider from "next-auth/providers/twitter"
 
 export const authOptions = {
-    providers: [
-       // GoogleProvider({
-       //     clientId: process.env.Google_CID ?? "",
-       //     clientSecret: process.env.Google_Client ?? ""
-       // }),
-        GitHubProvider({
-          clientId: process.env.GITHUB_ID ?? "",
-          clientSecret: process.env.GITHUB_SECRET ?? ""
-        }),
-        TwitterProvider({
-          clientId: process.env.TWITTER_CLIENT_ID ?? "",
-          clientSecret: process.env.TWITTER_CLIENT_SECRET ?? ""
-        }),
-    //  CredentialsProvider({
-    //      name: 'Email',
-    //      credentials: {
-    //        email: {label: "Email id", type: "Email", placeholder: "John@doe.com"},
-    //        password: { label: "Password", type: "password" }
-    //      },
-    //      // TODO: User credentials type from next-aut
-    //      async authorize(credentials: any) {
-    //        // Do zod validation, OTP validation here
-    //        const hashedPassword = await bcrypt.hash(credentials.password, 10);
-    //        const existingUser = await db.user.findFirst({
-    //            where: {
-    //                email: credentials.email
-    //            }
-    //        });//
+  providers: [
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID ?? "",
+      clientSecret: process.env.GITHUB_SECRET ?? "",
+    }),
 
-    //        if (existingUser) {
-    //          if (existingUser.password && typeof existingUser.password === 'string') {
-    //            const passwordValidation = await bcrypt.compare(credentials.password, existingUser.password);
-    //            if (passwordValidation) {
-    //                return {
-    //                    id: existingUser.id.toString(),
-    //                    name: existingUser.name,
-    //                    email: existingUser.email
-    //                }
-    //            }
-    //            return null;
-    //          }
-    //        }//
-
-    //        try {
-    //            const user = await db.user.create({
-    //                data: {
-    //                    email: credentials.email,
-    //                    password: hashedPassword
-    //                }
-    //            });
-    //        
-    //            return {
-    //                id: user.id.toString(),
-    //                name: user.name,
-    //                email: user.email
-    //            }
-    //        } catch(e) {
-    //            console.error(e);
-    //        }//
-
-    //        return null
-    //      },
-    //    })
-    ],
-    secret: process.env.JWT_SECRET || "secret",
-    callbacks: {
-      async signIn({ user, account, profile }:{
-        user: any;
-      account: any;
-      profile?: any;
-      }) {
-        if (!user.email) {
-          throw new Error("Email is required for sign-in");
-        }
-  
-        const existingUser = await db.user.findFirst({
-          where: { email: user.email },
-        });
-  
-        if (!existingUser) {
-          await db.user.create({
-            data: {
-              email: user.email,
-              name: user.name || "User",
-              auth_type: "Github",
-              image: user.image || "",
-              password: "Github"
-            },
-          });
-        } else {
-          await db.user.update({
-            where: { email: user.email },
-            data: {
-              name: user.name || existingUser.name,
-              image: user.image || existingUser.image,
-            },
-          });
-        }
-  
-        return true;
+    // Guest Provider using CredentialsProvider
+    CredentialsProvider({
+      name: "Guest",
+      credentials: {},
+      async authorize(credentials: any): Promise<User | null> {
+        // Return guest user with a structure that satisfies the User type
+        return {
+          id: "guest",         // Add an ID
+          name: "Guest User",   // Name of the guest user
+          email: "guest@example.com",  // Email of the guest user
+        };
       },
-        async session({ token, session }: any) {
-            session.user.id = token.sub
-            return session
-        }
-    }
-  }
- 
+    }),
+  ],
+
+  secret: process.env.JWT_SECRET || "secret",
+
+  callbacks: {
+    async signIn({ user, account, profile }: { user: any; account: any; profile?: any }) {
+      if (user.email === "guest@example.com") {
+        return true;
+      }
+
+      if (!user.email) {
+        throw new Error("Email is required for sign-in");
+      }
+
+      const existingUser = await db.user.findFirst({
+        where: { email: user.email },
+      });
+
+      if (!existingUser) {
+        await db.user.create({
+          data: {
+            email: user.email,
+            name: user.name || "User",
+            auth_type: account.provider || "Credentials",
+            image: user.image || "",
+            password: account.provider === "credentials" ? "Credentials" : "Github",
+          },
+        });
+      } else {
+        await db.user.update({
+          where: { email: user.email },
+          data: {
+            name: user.name || existingUser.name,
+            image: user.image || existingUser.image,
+          },
+        });
+      }
+
+      return true;
+    },
+
+    async session({ token, session }: any) {
+      session.user.id = token.sub;
+      return session;
+    },
+  },
+};
