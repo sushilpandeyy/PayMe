@@ -6,27 +6,48 @@ import { Card, CardContent, CardDescription, CardTitle, CardHeader, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Share } from "lucide-react";
+import { CheckCircleIcon, LucideXCircle } from 'lucide-react';
 import axios from "axios";
-
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+
+// Loader component for success, error, and loading states
+const PaymentStatus = ({ status }: { status: "loading" | "success" | "error" }) => {
+  return (
+    <div className="flex justify-center items-center flex-col space-y-4">
+      {status === "loading" && (
+        <div className="w-16 h-16 border-4 border-gray-300 border-t-primary-button-bg rounded-full animate-spin"></div>
+      )}
+      {status === "success" && (
+        <>
+          <CheckCircleIcon className="w-16 h-16 text-green-500" />
+          <p className="text-green-500">Payment Successful!</p>
+        </>
+      )}
+      {status === "error" && (
+        <>
+          <LucideXCircle className="w-16 h-16 text-red-500" />
+          <p className="text-red-500">Payment Failed!</p>
+        </>
+      )}
+    </div>
+  );
+};
 
 interface PinInputModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userID: string; // Accept userID as a prop
-  amount: string; // Accept amount as a prop
+  userID: string;
+  amount: string;
 }
 
 const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) => {
   const [pin, setPin] = useState<string>("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const handleDigitInput = (digit: string) => {
     if (pin.length < 4) {
@@ -40,30 +61,39 @@ const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) 
 
   const handleSubmit = async () => {
     if (pin.length === 4) {
-      console.log("Submitted PIN:", pin);
-      // Retrieve session data from sessionStorage
+      setStatus("loading");
+      
       const sessionData = sessionStorage.getItem("sessionData");
       if (!sessionData) {
         alert("Session not found. Please log in again.");
+        setStatus("error");
         return;
       }
       const session = JSON.parse(sessionData);
 
       try {
         const response = await axios.post("/api/p/transaction/account", {
-          Sender_Id: session?.user?.email, // Use the session's user email
-          Receiver_Id: userID, 
-          Amount: amount, 
-          Category: "test", 
+          Sender_Id: session?.user?.email,
+          Receiver_Id: userID,
+          Amount: amount,
+          Category: "test",
           PIN: pin,
         });
-        // Handle response if needed
-      } catch (error) {
-        console.error("Error:", error);
-      }
 
-      setPin("");
-      onClose();
+        if (response.status === 201) {
+          setStatus("success");
+        } else {
+          setStatus("error");
+        }
+      } catch (error) {
+        setStatus("error");
+      } finally {
+        setTimeout(() => {
+          setStatus("idle");
+          setPin("");
+          onClose();
+        }, 2000); // Close modal after 2 seconds
+      }
     } else {
       alert("Please enter a 4-digit PIN");
     }
@@ -76,50 +106,56 @@ const PinInputModal = ({ isOpen, onClose, userID, amount }: PinInputModalProps) 
           <DialogTitle>Enter Your 4-Digit PIN</DialogTitle>
         </DialogHeader>
 
-        {/* PIN input */}
-        <div className="flex justify-center items-center mb-4">
-          <input
-            type="password"
-            value={pin}
-            className="text-center text-3xl p-2 w-24 border-b-2 border-gray-500 text-black" 
-            readOnly
-            maxLength={4}
-          />
-        </div>
+        {status === "idle" && (
+          <>
+            {/* PIN input */}
+            <div className="flex justify-center items-center mb-4">
+              <input
+                type="password"
+                value={pin}
+                className="text-center text-3xl p-2 w-24 border-b-2 border-gray-500 text-black"
+                readOnly
+                maxLength={4}
+              />
+            </div>
 
-        {/* Classic Keyboard-like button layout with line breaks after 3 buttons */}
-        <div className="flex flex-wrap justify-center max-w-[180px] mx-auto">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
-            <Button
-              key={digit}
-              variant="outline"
-              className="text-2xl h-14 w-14 rounded-full flex justify-center items-center"
-              onClick={() => handleDigitInput(digit.toString())}
-            >
-              {digit}
-            </Button>
-          ))}
-          <Button
-            variant="outline"
-            className="h-14 w-14 rounded-full flex justify-center items-center"
-            onClick={handleBackspace}
-          >
-            ⌫
-          </Button>
-          <Button
-            variant="outline"
-            className="text-2xl h-14 w-14 rounded-full flex justify-center items-center"
-            onClick={() => handleDigitInput("0")}
-          >
-            0
-          </Button>
-          <Button
-            className="h-14 w-14 rounded-full flex justify-center items-center"
-            onClick={handleSubmit}
-          >
-            ✔
-          </Button>
-        </div>
+            {/* Classic Keyboard-like button layout */}
+            <div className="flex flex-wrap justify-center max-w-[180px] mx-auto">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+                <Button
+                  key={digit}
+                  variant="outline"
+                  className="text-2xl h-14 w-14 rounded-full flex justify-center items-center"
+                  onClick={() => handleDigitInput(digit.toString())}
+                >
+                  {digit}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                className="h-14 w-14 rounded-full flex justify-center items-center"
+                onClick={handleBackspace}
+              >
+                ⌫
+              </Button>
+              <Button
+                variant="outline"
+                className="text-2xl h-14 w-14 rounded-full flex justify-center items-center"
+                onClick={() => handleDigitInput("0")}
+              >
+                0
+              </Button>
+              <Button
+                className="h-14 w-14 rounded-full flex justify-center items-center"
+                onClick={handleSubmit}
+              >
+                ✔
+              </Button>
+            </div>
+          </>
+        )}
+
+        {status !== "idle" && <PaymentStatus status={status} />}
       </DialogContent>
     </Dialog>
   );
@@ -140,7 +176,6 @@ export default function Transfertrans() {
   };
 
   const handleSend = async () => {
-    // Retrieve session data from sessionStorage
     const sessionData = sessionStorage.getItem("sessionData");
     if (!sessionData) {
       alert("Session not found. Please log in again.");
@@ -152,8 +187,8 @@ export default function Transfertrans() {
       const response = await axios.get(`/api/p/transaction/verify?id=${session?.user?.email}&amt=${amount}`);
       if (response.status === 200) {
         setVerificationStatus("verified");
-        handleOpenModal();  
-      } else if(response.status === 201){
+        handleOpenModal();
+      } else if (response.status === 201) {
         setVerificationStatus("Low");
       } else {
         setVerificationStatus("notFound");
@@ -207,28 +242,16 @@ export default function Transfertrans() {
               </Card>
 
               {verificationStatus === "verified" && (
-                <PinInputModal 
-                  isOpen={isModalOpen} 
-                  onClose={handleCloseModal} 
-                  userID={userID}   
-                  amount={amount}  
+                <PinInputModal
+                  isOpen={isModalOpen}
+                  onClose={handleCloseModal}
+                  userID={userID}
+                  amount={amount}
                 />
               )}
-              {verificationStatus === "notFound" && (
-                <div className="mt-4 text-red-500">
-                  UserID not found. Please check the UserID and try again.
-                </div>
-              )}
-              {verificationStatus === "Low" && (
-                <div className="mt-4 text-yellow-500">
-                  Low Balance.
-                </div>
-              )}
-              {verificationStatus === "error" && (
-                <div className="mt-4 text-red-500">
-                  An error occurred while verifying the UserID. Please try again later.
-                </div>
-              )}
+              {verificationStatus === "notFound" && <div className="mt-4 text-red-500">UserID not found.</div>}
+              {verificationStatus === "Low" && <div className="mt-4 text-yellow-500">Low Balance.</div>}
+              {verificationStatus === "error" && <div className="mt-4 text-red-500">An error occurred.</div>}
             </TabsContent>
             <TabsContent value="Receive">
               <Card>
@@ -240,7 +263,7 @@ export default function Transfertrans() {
                   <div className="flex items-end justify-between">
                     <span className="text-lg">Order Oe31b70H</span>
                     <span className="text-lg">
-                      <Share />
+                      Share
                     </span>
                   </div>
                   <div className="h-20"></div>

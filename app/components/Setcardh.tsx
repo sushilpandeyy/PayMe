@@ -14,24 +14,37 @@ export default function Setcardh() {
       const cachedSession = sessionStorage.getItem("sessionData");
       if (cachedSession) {
         const sessionData = JSON.parse(cachedSession);
-        
-        // Retrieve transaction data if available in sessionStorage
-        const cachedTransactionData = sessionStorage.getItem("transactionData");
 
         try {
+          // Fetch the latest transaction data
+          const response = await axios.get(
+            `api/p/transaction/account?id=${sessionData.user.email}`
+          );
+          const newTransactionData = response.data;
+
+          // Retrieve transaction data from sessionStorage
+          const cachedTransactionData = sessionStorage.getItem("transactionData");
+
+          // Check if the cached data exists and matches the newly fetched data
           if (cachedTransactionData) {
-            // Use cached transaction data if available
-            setData(JSON.parse(cachedTransactionData));
+            const storedTransactionData = JSON.parse(cachedTransactionData);
+
+            // Compare the cached data and new data (using a simple deep equality check)
+            const isDataSame = JSON.stringify(storedTransactionData) === JSON.stringify(newTransactionData);
+
+            if (!isDataSame) {
+              // If data is different, clear session storage and re-render the page with new data
+              sessionStorage.removeItem("transactionData");
+              setData(newTransactionData);
+              sessionStorage.setItem("transactionData", JSON.stringify(newTransactionData));
+            } else {
+              // If data is the same, use the cached data
+              setData(storedTransactionData);
+            }
           } else {
-            // Fetch new transaction data
-            const response = await axios.get(
-              `api/p/transaction/account?id=${sessionData.user.email}`
-            );
-            const transactionData = response.data;
-            
-            // Cache the new transaction data
-            sessionStorage.setItem("transactionData", JSON.stringify(transactionData));
-            setData(transactionData);
+            // If no cached data, store and set the new transaction data
+            setData(newTransactionData);
+            sessionStorage.setItem("transactionData", JSON.stringify(newTransactionData));
           }
           setLoading(false);
         } catch (err) {
@@ -71,24 +84,37 @@ export function Headcards() {
       const cachedSession = sessionStorage.getItem("sessionData");
       if (cachedSession) {
         const sessionData = JSON.parse(cachedSession);
-        
-        // Retrieve transaction data if available in sessionStorage
-        const cachedTransactionData = sessionStorage.getItem("transactionData");
 
         try {
+          // Fetch the latest transaction data
+          const response = await axios.get(
+            `api/p/transaction/account?id=${sessionData.user.email}`
+          );
+          const newTransactionData = response.data;
+
+          // Retrieve transaction data from sessionStorage
+          const cachedTransactionData = sessionStorage.getItem("transactionData");
+
+          // Check if the cached data exists and matches the newly fetched data
           if (cachedTransactionData) {
-            // Use cached transaction data if available
-            setData(JSON.parse(cachedTransactionData));
+            const storedTransactionData = JSON.parse(cachedTransactionData);
+
+            // Compare the cached data and new data (using a simple deep equality check)
+            const isDataSame = JSON.stringify(storedTransactionData) === JSON.stringify(newTransactionData);
+
+            if (!isDataSame) {
+              // If data is different, clear session storage and re-render the page with new data
+              sessionStorage.removeItem("transactionData");
+              setData(newTransactionData);
+              sessionStorage.setItem("transactionData", JSON.stringify(newTransactionData));
+            } else {
+              // If data is the same, use the cached data
+              setData(storedTransactionData);
+            }
           } else {
-            // Fetch new transaction data
-            const response = await axios.get(
-              `api/p/transaction/account?id=${sessionData.user.email}`
-            );
-            const transactionData = response.data;
-            
-            // Cache the new transaction data
-            sessionStorage.setItem("transactionData", JSON.stringify(transactionData));
-            setData(transactionData);
+            // If no cached data, store and set the new transaction data
+            setData(newTransactionData);
+            sessionStorage.setItem("transactionData", JSON.stringify(newTransactionData));
           }
           setLoading(false);
         } catch (err) {

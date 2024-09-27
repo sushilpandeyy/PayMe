@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
-import { User } from "next-auth";  // Import the User type from next-auth
+import { User } from "next-auth";  
 
 const db = new PrismaClient();
 
