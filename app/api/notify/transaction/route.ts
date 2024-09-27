@@ -90,6 +90,7 @@ export async function GET(req: NextRequest) {
     }
 }
 
+// PATCH: Mark all notifications as viewed and remove excess ones
 export async function PATCH(req: NextRequest) {
     try {
         const body = await req.json();
@@ -166,5 +167,3 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to delete notifications' }, { status: 500 });
     }
 }
-
-export { addNewNotifications };
