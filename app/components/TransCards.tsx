@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import { IndianRupee, ArrowDownUp, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 
-function TotalBalCard({ balance, user }: { balance: number, user: string }) {
+function TotalBalCard({ balance, user }: { balance: number, user?: string }) {
     return (
         <Card className="p-4 h-max">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -18,7 +18,7 @@ function TotalBalCard({ balance, user }: { balance: number, user: string }) {
     );
 }
 
-function TransactionsCard({ transactions }: { transactions: number }) {
+function TransactionsCard({ transactions }: { transactions: any }) {
     return (
         <Card className="p-4 h-max">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
