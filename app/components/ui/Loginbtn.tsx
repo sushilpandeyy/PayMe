@@ -20,14 +20,9 @@ import { signOut } from "next-auth/react";
 
 export default function Loginbtn() {
     return (
-      <Button  asChild
-      variant="ghost"
-      size="icon"
-      className="rounded-lg bg-muted"
-      aria-label="Home"
-      >
-        <Link href="/api/auth/signin">Login</Link>
-      </Button>
+      <div>
+        <Link href="/api/auth/signin">Get Started </Link>
+      </div>
     )
   }
 
@@ -41,21 +36,32 @@ export function Logindrop({ children }: { children: React.ReactNode }){
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          <Link href={"/dashboard"}>
+        <DropdownMenuItem>
+            Dashboard
+          </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem>
             Profile
           </DropdownMenuItem>
+          <Link href={"/transfer"}>
           <DropdownMenuItem>
             Transfer Money
           </DropdownMenuItem>
+          </Link>
+          <Link href={"/transaction"}>
           <DropdownMenuItem>
             Transactions 
           </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem>
             Report
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        <Link href={"https://github.com/sushilpandeyy/payme"}>
         <DropdownMenuItem>GitHub</DropdownMenuItem>
+        </Link>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <div onClick={()=>{

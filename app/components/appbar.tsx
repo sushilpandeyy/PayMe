@@ -13,14 +13,12 @@ const Logg = () => {
     const [cachedSession, setCachedSession] = useState<any>(null);
 
     useEffect(() => {
-        // Check session storage for cached session data
         const cachedSessionData = sessionStorage.getItem("sessionData");
         if (cachedSessionData) {
             setCachedSession(JSON.parse(cachedSessionData)); // Use cached session data
         }
 
         if (sessionStatus === "authenticated" && session) {
-            // Cache session data in sessionStorage if available
             sessionStorage.setItem("sessionData", JSON.stringify(session));
             setCachedSession(session); // Update the cached session state
         }

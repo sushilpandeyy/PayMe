@@ -23,6 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Provider>
         <Appbar/>
+         <Navbar selected="Home" />
         {children}
         </Provider>
         </body>

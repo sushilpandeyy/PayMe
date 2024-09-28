@@ -26,9 +26,6 @@ if(a.status=="unauthenticated"){
   return (
     <main className="flex min-h-screen flex-col items-start justify-between p-3">
     <div className="flex content-start justify-start w-full">
-    <Navbar
-     selected="Transaction"
-    />
     <div className="headcards w-full">
     <Headcards/>
     <div className="btns">

@@ -22,7 +22,6 @@ export default function Dashboard() {
   return (
     <main className="flex min-h-screen flex-col items-start justify-between p-3">
       <div className="flex content-start justify-start w-full">
-        <Navbar selected="Home" />
         <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 lg:grid-cols-2">
           <div className="flex flex-col">
             <Setcardh />

@@ -22,6 +22,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <Provider>
         <Appbar/>
+        <Navbar
+     selected="Transaction"
+    />
         {children}
         </Provider>
         </body>

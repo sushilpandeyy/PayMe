@@ -23,7 +23,6 @@ export default function Transfer() {
   return (
     <main className="flex min-h-screen flex-col items-start justify-between p-3">
       <div className="flex content-start justify-start w-full">
-        <Navbar selected="Transfer" />
         <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 lg:grid-cols-2">
           <div className="flex flex-col p-4">
             <h2 className="text-2xl p-1">Transfer Amount</h2>
