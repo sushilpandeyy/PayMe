@@ -25,7 +25,9 @@ export default function RootLayout({
         <Navbar
      selected="crypto"
     />
-        {children}
+    <>        
+    {children}
+    </>
         </Provider>
         </body>
     </html>
