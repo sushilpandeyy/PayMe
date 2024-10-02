@@ -1,12 +1,12 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "../globals.css";
+import "./globals.css"; // Ensure the correct path
 import { Provider } from "../provider";
 import Appbar from "../components/appbar";
 import Navbar from "../components/navbar";
-const inter = Inter({ subsets: ["latin"] });
 
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,11 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Provider>
-        <Appbar/>
-         <Navbar selected="Home" />
-        {children}
+          <Appbar />
+          <Navbar selected="crypto" /> {/* You can pass this dynamically if needed */}
+          {children}
         </Provider>
-        </body>
+      </body>
     </html>
   );
 }

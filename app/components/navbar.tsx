@@ -12,7 +12,7 @@ export default function Navbar({ selected }: NavbarProps) {
   return (
     <nav className="flex flex-row gap-1 p-4 py-6 w-full justify-start">
       <Link
-        href="/dashboard"
+        href="/home"
         className={
           selected == "Home"
             ? "flex items-center gap-3 rounded-xl bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
@@ -43,6 +43,17 @@ export default function Navbar({ selected }: NavbarProps) {
       >
         <ArrowLeftRight className="size-5" />
         Transactions
+      </Link>
+      <Link
+        href="/dashboard"
+        className={
+          selected == "crypto"
+            ? "flex items-center gap-3 rounded-xl bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+            : "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+        }
+      >
+        <ArrowLeftRight className="size-5" />
+        Crypto
       </Link>
     </nav>
   );

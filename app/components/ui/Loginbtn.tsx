@@ -36,9 +36,9 @@ export function Logindrop({ children }: { children: React.ReactNode }){
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <Link href={"/dashboard"}>
+          <Link href={"/home"}>
         <DropdownMenuItem>
-            Dashboard
+            Home
           </DropdownMenuItem>
           </Link>
           <DropdownMenuItem>
