@@ -26,7 +26,7 @@ export default function BalanceGraph(){
     <CardHeader className="space-y-0 pb-0">
       <CardDescription>Balance</CardDescription>
       <CardTitle className="flex items-baseline gap-1 text-4xl tabular-nums">
-      ₹434
+      $434
         <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
         
         </span>

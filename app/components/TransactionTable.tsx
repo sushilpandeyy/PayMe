@@ -220,7 +220,7 @@ export default function TransactionTable() {
                       <TableCell className="hidden md:table-cell">
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-right">₹{transaction.Amount}</TableCell>
+                      <TableCell className="text-right">${transaction.Amount}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

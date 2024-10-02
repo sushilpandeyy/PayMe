@@ -25,7 +25,6 @@ interface NotificationItem {
 }
 
 export default function Notification() {
-  console.log("IT RAm")
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
